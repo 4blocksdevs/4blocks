@@ -99,16 +99,16 @@ export default function CookieBanner() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-      <Card className="max-w-4xl mx-auto shadow-2xl border-2 border-gray-200 bg-white">
-        <CardContent className="p-6">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-2">
+      <Card className="max-w-2xl mx-auto shadow-lg border border-gray-200 bg-white">
+        <CardContent className="p-3">
           {!showSettings ? (
             // Main banner
             <div>
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <Info className="w-6 h-6 text-[#9ED95D]" />
-                  <h3 className="text-lg font-semibold text-black">We value your privacy</h3>
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <Info className="w-4 h-4 text-[#9ED95D]" />
+                  <h3 className="text-base font-semibold text-black">We value your privacy</h3>
                 </div>
                 <Button
                   variant="ghost"
@@ -116,14 +116,14 @@ export default function CookieBanner() {
                   onClick={() => setShowBanner(false)}
                   className="text-black hover:text-black"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </Button>
               </div>
-              <p className="text-black mb-4 text-sm">
+              <p className="text-black mb-2 text-xs">
                 We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. <br />
                 By clicking &quot;Accept All,&quot; you consent to our use of cookies. You can also choose &quot;Reject All&quot; or &quot;Customize Settings&quot; to control your preferences.
               </p>
-              <div className="text-sm text-black mb-6">
+              <div className="text-xs text-black mb-3">
                 Read our{' '}
                 <Link href="/privacy-policy" className="text-[#9ED95D] hover:underline">
                   Privacy Policy
@@ -134,26 +134,26 @@ export default function CookieBanner() {
                 </Link>
                 {' '}for more information.
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={handleAcceptAll}
-                  className="bg-[#9ED95D] hover:bg-[#8BC34A] text-black"
+                  className="bg-[#9ED95D] hover:bg-[#8BC34A] text-black text-xs px-3 "
                 >
                   Accept All
                 </Button>
                 <Button
                   onClick={handleRejectAll}
                   variant="outline"
-                  className="border-gray-300 text-black hover:bg-gray-50"
+                  className="border-gray-300 text-black hover:bg-gray-50 text-xs px-3 "
                 >
                   Reject All
                 </Button>
                 <Button
                   onClick={() => setShowSettings(true)}
                   variant="outline"
-                  className="border-gray-300 text-[#9ED95D] hover:bg-gray-50"
+                  className="border-gray-300 text-[#9ED95D] hover:bg-gray-50 text-xs px-3 "
                 >
-                  <Settings className="w-4 h-4 mr-2" />
+                  <Settings className="w-3 h-3 mr-1" />
                   Customize Settings
                 </Button>
               </div>
@@ -161,8 +161,8 @@ export default function CookieBanner() {
           ) : (
             // Settings panel
             <div>
-              <div className="flex items-start justify-between mb-6">
-                <h3 className="text-md font-semibold text-black">Customize Settings</h3>
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="text-sm font-semibold text-black">Customize Settings</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -172,11 +172,11 @@ export default function CookieBanner() {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg">
                   <div>
-                    <h4 className="font-medium text-black">Necessary Cookies</h4>
-                    <p className="text-xs text-black">
+                    <h4 className="font-medium text-black text-xs">Necessary Cookies</h4>
+                    <p className="text-[10px] text-black">
                       These cookies are essential for the website to function and cannot be switched off in our systems. They are usually only set in response to actions you take, such as setting your privacy preferences, logging in, or filling out forms. Without these cookies, parts of our site will not work properly.
                     </p>
                      
@@ -186,15 +186,15 @@ export default function CookieBanner() {
                       type="checkbox"
                       checked={preferences.essential}
                       disabled
-                      className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D]"
-                      />
-                      <span className="inline-block text-xs text-[#9ED95D] p-2 font-semibold mt-1">Always Active</span>
+                      className="w-3 h-3 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D]"
+                    />
+                    <span className="inline-block text-[10px] text-[#9ED95D] p-1 font-semibold mt-0.5">Always Active</span>
                   </div>
                 </div>
-                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg">
+                  <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg">
                   <div>
-                    <h4 className="font-medium text-black">Analytics Cookies</h4>
-                    <p className="text-xs text-black">
+                    <h4 className="font-medium text-black text-xs">Analytics Cookies</h4>
+                    <p className="text-[10px] text-black">
                       These cookies help us understand how visitors interact with our website. We use them to count visits, measure traffic sources, and improve our performance. They show us which pages are most and least popular and how visitors move around the site.
                     </p>
                   </div>
@@ -206,14 +206,14 @@ export default function CookieBanner() {
                         ...preferences,
                         analytics: e.target.checked
                       })}
-                        className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-4"
+                      className="w-3 h-3 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-2"
                     />
                   </div>
                 </div>
-                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg ">
+                  <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg ">
                   <div>
-                    <h4 className="font-medium text-black">Marketing Cookies</h4>
-                    <p className="text-xs text-black">
+                    <h4 className="font-medium text-black text-xs">Marketing Cookies</h4>
+                    <p className="text-[10px] text-black">
                       These cookies may be set by our advertising and marketing partners, such as Meta (Facebook) and HubSpot. They may be used to build a profile of your interests, deliver relevant advertising on other websites, and measure the effectiveness of campaigns.
                     </p>
                   </div>
@@ -225,39 +225,38 @@ export default function CookieBanner() {
                         ...preferences,
                         marketing: e.target.checked
                       })}
-                        className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-4"
+                      className="w-3 h-3 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-2"
                     />
                   </div>
                 </div>
-                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg ">
+                  <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg ">
                   <div>
-                    <h4 className="font-medium text-black">Functional Cookies</h4>
-                    <p className="text-sm text-black">
+                    <h4 className="font-medium text-black text-xs">Functional Cookies</h4>
+                    <p className="text-[10px] text-black">
                       These cookies enable enhanced functionality and personalization, such as remembering your preferences or integrating with third-party services. If you do not allow these cookies, some or all of these services may not function properly.
                     </p>
                   </div>
-                  <div className="flex mx-4 items-center">
+                  <div className="flex mx-2 items-center">
                     <input
                       type="checkbox"
                       checked={false}
                       disabled
-                        className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] opacity-50 cursor-not-allowed"
+                      className="w-3 h-3 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] opacity-50 cursor-not-allowed"
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end gap-3 mt-6">
-                  <Button
-                    onClick={() => setShowSettings(false)}
-                  
-                  className="bg-[#9ED95D] hover:bg-[#8BC34A] text-white"
+              <div className="flex justify-end gap-2 mt-3">
+                <Button
+                  onClick={() => setShowSettings(false)}
+                  className="bg-[#9ED95D] hover:bg-[#8BC34A] text-white text-xs px-3 "
                 >
-                 Back
+                  Back
                 </Button>
                 <Button
                   onClick={handleAcceptSelected}
                   variant="outline"
-                  className="border-gray-300 text-black hover:bg-gray-50"
+                  className="border-gray-300 text-black hover:bg-gray-50 text-xs px-3 "
                 >
                   Save Preferences
                 </Button>

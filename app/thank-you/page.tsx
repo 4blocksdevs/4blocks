@@ -139,28 +139,19 @@ export default function ThankYouPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="container mx-auto px-4 py-6">
-        <div className="flex items-center">
-          <div className="w-12 h-12  rounded-lg flex items-center justify-center">
-            <Image src="/logo.svg" alt="4Blocks Logo" width={42} height={48} />
-            {/* <span className="text-white font-bold text-sm">4</span> */}
-          </div>
-          <span className="ml-2 text-2xl font-bold text-black">BLOCKS</span>
-        </div>
-      </header>
+ 
 
       {/* Thank You Section */}
-      <section className="container mx-auto px-4 py-12 text-center">
+  <section className="container mx-auto px-2 py-6 text-center">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl lg:text-5xl font-bold text-black mb-4">
+          <h1 className="text-3xl lg:text-5xl font-bold text-black mb-2">
             Thank You!
             <br />
             Your{" "}
             <span className="text-[#9ED95D] font-semibold">MVP Roadmap</span> Is
             on Its Way 🚀
           </h1>
-          <p className="text-black mb-8">
+          <p className="text-black mb-4 text-base">
             Check your inbox,
             <br />
             your roadmap will arrive within a few minutes.
@@ -168,39 +159,39 @@ export default function ThankYouPage() {
 
           {/* Email Icon */}
           <div className="mb-8">
-            <div className="w-16 h-16   flex items-center justify-center mx-auto mb-4">
-              <Image src="/arrow.svg" alt="Arrow" width={100} height={100} />
+            <div className="w-14 h-14 flex items-center justify-center mx-auto mb-2">
+              <Image src="/arrow.svg" alt="Arrow" width={48} height={48} />
             </div>
-            <div className="w-24 h-24 relative flex items-center justify-center mx-auto mb-4">
-              <Image src="/email.svg" alt="Email" width={100} height={100} />
-              <div className="absolute bottom-2 -right-2 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-                <Image src="/check.svg" alt="Check" width={100} height={100} />
+            <div className="w-16 h-16 relative flex items-center justify-center mx-auto mb-2">
+              <Image src="/email.svg" alt="Email" width={60} height={60} />
+              <div className="absolute bottom-1 -right-1 w-7 h-7  flex items-center justify-center ">
+                <Image src="/check.svg" alt="Check" width={28} height={28} />
               </div>
             </div>
           </div>
 
-          <Button className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-8 py-8 mb-16">
+          <Button className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 text-base">
             DOWNLOAD MVP ROADMAP
           </Button>
         </div>
       </section>
 
       {/* Consultation CTA */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl lg:text-5xl font-bold text-black mb-4">
+  <section className="container mx-auto px-2 py-8">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl lg:text-4xl font-bold text-black mb-2">
             Turn Your <span className="text-[#9ED95D]">MVP</span> Roadmap
             <br />
             Into Reality With a Free Consultation
           </h2>
-          <p className="text-xl text-black max-w-2xl mx-auto">
+          <p className="text-base my-6 text-black max-w-2xl mx-auto">
             Book a one-on-one strategy call with Mirko, our CEO,
             <br />
             gain practical insights to move your project forward.
           </p>
         </div>
-        <div className="text-center mb-12">
-          <h2 className="text-2xl lg:text-3xl font-bold text-black mb-4">
+        <div className="text-center mb-6">
+          <h2 className="text-xl lg:text-3xl font-bold text-black mb-2">
             Your Shortcut to a Winning{" "}
             <span className="text-[#9ED95D]">MVP</span>
             <br />
@@ -209,24 +200,23 @@ export default function ThankYouPage() {
         </div>
 
         {/* Benefits Grid */}
-        <div className="grid max-w-5xl mx-auto grid-cols-1 gap-6 mb-12">
-          <Card className="p-6 shadow-xl border-0 bg-white">
+  <div className="grid max-w-3xl mx-auto grid-cols-1 gap-3 mb-6">
+          <Card className="p-3 shadow-lg border-0 bg-white">
             <CardContent className="p-0">
               <div className="flex items-center py-2 space-x-4">
-                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
-                   <Image
-                                        src="/tools.svg"
-                                        alt="Roadmap"
-                                        width={40}
-                                        height={40}
-                  
-                                      />
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                  <Image
+                    src="/tools.svg"
+                    alt="Roadmap"
+                    width={20}
+                    height={20}
+                  />
                 </div>
                 <div>
-                  <h3 className="font-bold text-black text-lg mb-2">
+                  <h3 className="font-bold text-black text-base mb-1">
                     Free Mini-Audit of Your MVP Idea
                   </h3>
-                  <p className="text-base text-black">
+                  <p className="text-sm text-black">
                     Get a quick audit of your MVP idea with recommendations to
                     improve success.
                   </p>
@@ -235,23 +225,22 @@ export default function ThankYouPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 shadow-xl border-0 bg-white">
+          <Card className="p-3 shadow-lg border-0 bg-white">
             <CardContent className="p-0">
               <div className="flex items-center py-2 space-x-4">
-                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
                   <Image
                     src="/clock.svg"
                     alt="Roadmap"
-                    width={40}
-                    height={40}
-
+                    width={20}
+                    height={20}
                   />
                 </div>
                 <div>
-                  <h3 className="font-bold text-black text-lg mb-2">
+                  <h3 className="font-bold text-black text-base mb-1">
                     Real Cost & Timeline Estimates
                   </h3>
-                  <p className="text-base text-black">
+                  <p className="text-sm text-black">
                     Understand realistic costs, timelines, and development
                     phases, no surprises
                   </p>
@@ -260,23 +249,22 @@ export default function ThankYouPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 shadow-xl border-0 bg-white">
+          <Card className="p-3 shadow-lg border-0 bg-white">
             <CardContent className="p-0">
               <div className="flex items-center py-2 space-x-4">
-                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
                   <Image
                     src="/rocket.svg"
                     alt="Rocket"
-                    width={40}
-                    height={40}
-
+                    width={20}
+                    height={20}
                   />
                 </div>
                 <div>
-                  <h3 className="font-bold text-black text-lg mb-2">
+                  <h3 className="font-bold text-black text-base mb-1">
                     Growth Strategy Blueprint
                   </h3>
-                  <p className="text-base text-black">
+                  <p className="text-sm text-black">
                     We&apos;ll outline how to scale your MVP after launch
                   </p>
                 </div>
@@ -284,23 +272,22 @@ export default function ThankYouPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 shadow-xl border-0 bg-white">
+          <Card className="p-3 shadow-lg border-0 bg-white">
             <CardContent className="p-0">
               <div className="flex items-center py-2 space-x-4">
-                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
                   <Image
                     src="/key.svg"
                     alt="Key"
-                    width={40}
-                    height={40}
-
+                    width={20}
+                    height={20}
                   />
                 </div>
                 <div>
-                  <h3 className="font-bold text-black text-lg mb-2">
+                  <h3 className="font-bold text-black text-base mb-1">
                     Exclusive Free Slots
                   </h3>
-                  <p className="text-base text-black">
+                  <p className="text-sm text-black">
                     Only 10 free consultations available this month, secure
                     yours now.
                   </p>
@@ -309,23 +296,22 @@ export default function ThankYouPage() {
             </CardContent>
           </Card>
 
-          <Card className="p-6 shadow-xl border-0 bg-white">
+          <Card className="p-3 shadow-lg border-0 bg-white">
             <CardContent className="p-0">
               <div className="flex items-center py-2 space-x-4">
-                <div className="w-16 h-16 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
                   <Image
                     src="/italia.svg"
                     alt="Italia"
-                    width={40}
-                    height={40}
-
+                    width={20}
+                    height={20}
                   />
                 </div>
                 <div>
-                  <h3 className="font-bold text-black text-lg mb-2">
+                  <h3 className="font-bold text-black text-base mb-1">
                     Built with Italian Precision
                   </h3>
-                  <p className="text-base text-black">
+                  <p className="text-sm text-black">
                     Our team in Italy has delivered dozens of successful
                     software projects for startups & enterprises.
                   </p>
@@ -335,38 +321,38 @@ export default function ThankYouPage() {
           </Card>
         </div>
 
-        <div className="text-center mb-8">
-          <p className="text-lg font-bold text-black italic mb-8 max-w-3xl mx-auto">
+        <div className="text-center my-4">
+          <p className="text-base font-bold text-black italic mb-4 max-w-xl mx-auto">
             &quot;Projects without proper planning fail 80% of the time. Our
             roadmap and consultation reduce that risk dramatically.&quot;
           </p>
           <Button
             onClick={handleBookCall}
-            className="bg-[#9ED95D] hover:bg-gray-300 text-black font-semibold px-8 py-8 mb-8"
+            className="bg-[#9ED95D] hover:bg-gray-300 text-black font-semibold px-4 py-4 mb-4 text-base"
           >
             BOOK YOUR FREE STRATEGY CALL
           </Button>
         </div>
 
         {/* Calendly Embed */}
-        <div className="max-w-4xl mx-auto">
-          <Card className="p-0 shadow-2xl border-0 bg-gradient-to-br from-[#f8fff0] to-[#e9f7e0] rounded-2xl relative overflow-visible">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-              <span className="bg-[#9ED95D] text-black text-xs font-bold px-4 py-1 rounded-full shadow-md border border-[#b6e89a]">FREE CONSULTATION</span>
+        <div className="max-w-xl mx-auto">
+          <Card className="p-0 shadow-xl border-0 bg-gradient-to-br from-[#f8fff0] to-[#e9f7e0] rounded-xl relative overflow-visible">
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
+              <span className="bg-[#9ED95D] text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md border border-[#b6e89a]">FREE CONSULTATION</span>
             </div>
             <CardContent className="p-0">
-              <div className="bg-white/80 rounded-2xl p-10 pt-16 text-center border border-[#e5e7eb]">
-                <h3 className="text-2xl font-extrabold text-black mb-4 tracking-tight flex items-center justify-center gap-2">
-                  <Clock className="w-7 h-7 text-[#9ED95D] mr-2" />
+              <div className="bg-white/80 rounded-xl p-5 pt-8 text-center border border-[#e5e7eb]">
+                <h3 className="text-lg font-extrabold text-black mb-2 tracking-tight flex items-center justify-center gap-1">
+                  <Clock className="w-5 h-5 text-[#9ED95D] mr-1" />
                   30 Minute Meeting
                 </h3>
-                <div className="grid md:grid-cols-2 gap-10 items-center">
-                  <div className="text-left space-y-5">
-                    <div className="flex items-center space-x-3">
-                      <Clock className="w-6 h-6 text-[#9ED95D]" />
-                      <span className="text-black font-semibold text-lg">30 min</span>
+                <div className="grid md:grid-cols-2 gap-4 items-center">
+                  <div className="text-left space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-[#9ED95D]" />
+                      <span className="text-black font-semibold text-sm">30 min</span>
                     </div>
-                    <div className="text-base text-black/80 leading-relaxed">
+                    <div className="text-xs text-black/80 leading-relaxed">
                       <p>Book a personalized online product vision call with Mirko, our CEO.</p>
                       <p className="mt-1">Available: <span className="font-semibold">9:30–21:30 CET</span></p>
                     </div>
@@ -376,10 +362,10 @@ export default function ThankYouPage() {
                     <iframe
                       src="https://calendly.com/your-calendly-username/30min"
                       width="100%"
-                      height="420"
+                      height="210"
                       frameBorder="0"
                       title="Book a 30 Minute Meeting with 4Blocks"
-                      style={{ minWidth: '320px', borderRadius: '1rem', border: '2px solid #9ED95D', boxShadow: '0 4px 32px 0 #b6e89a33' }}
+                      style={{ minWidth: '160px', borderRadius: '0.5rem', border: '1px solid #9ED95D', boxShadow: '0 2px 16px 0 #b6e89a33' }}
                       allow="camera; microphone; fullscreen; display-capture"
                     ></iframe>
                   </div>
@@ -390,13 +376,11 @@ export default function ThankYouPage() {
         </div>
       </section>
       {/* CTA Section */}
-      <div className="bg-[#9ED95D] container mx-auto rounded-xl max-w-2xl p-8 my-8">
+      <div className="bg-[#9ED95D] container mx-auto rounded-md max-w-xl p-6 m-8">
 
         <div className="text-center">
-          <form onSubmit={handleDirectDownload} className="space-y-4">
-            <div className='flex items-center gap-4'>
-
-
+          <form onSubmit={handleDirectDownload} className="space-y-2">
+            <div className='flex flex-col md:flex-row items-center gap-2'>
               <Input
                 id="email"
                 type="email"
@@ -404,21 +388,19 @@ export default function ThankYouPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="focus:outline-none  text-xl border-[#9ED95D] border"
+                className="focus:outline-none text-base border-[#9ED95D] border"
               />
-
-
               <Button
                 type='submit'
-                className="bg-white text-black hover:bg-gray-100 font-semibold px-8 py-7 text-lg"
+                className="bg-white text-black hover:bg-gray-100 font-semibold px-4 py-3 text-base"
               >
-                <Download className="w-5 h-5 mr-2" />
+                <Download className="w-4 h-4 mr-1" />
                 DOWNLOAD PDF
               </Button>
             </div>
           </form>
         </div>
-        </div>
+      </div>
       
     </div>
   );

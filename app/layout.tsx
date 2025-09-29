@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import Footer from '../components/footer';
+import Image from 'next/image';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -147,8 +148,23 @@ export default function RootLayout({
             style={{ display: 'none', visibility: 'hidden' }}
           />
         </noscript>
-        
-        <div className="max-w-7xl mx-auto w-full">
+        <div className="max-w-5xl mx-auto w-full">
+        {/* Header */}
+        <header className="container mx-auto px-4 py-6">
+          <a href="/" className="block w-fit" tabIndex={0} aria-label="Go to homepage">
+            <div className="flex items-center cursor-pointer">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center">
+                <Image
+                  src="/logo.svg"
+                  alt="4Blocks Logo"
+                  width={42}
+                  height={48}
+                />
+              </div>
+              <span className="ml-2 text-2xl font-bold text-black">BLOCKS</span>
+            </div>
+          </a>
+        </header>
           {children}
         </div>
   <Footer />
