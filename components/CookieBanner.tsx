@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { X, Cookie, Settings } from 'lucide-react';
+import { X, Cookie, Settings, Info } from 'lucide-react';
 import Link from 'next/link';
 
 interface CookiePreferences {
@@ -107,57 +107,54 @@ export default function CookieBanner() {
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <Cookie className="w-6 h-6 text-amber-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">We use cookies</h3>
+                  <Info className="w-6 h-6 text-[#9ED95D]" />
+                  <h3 className="text-lg font-semibold text-black">We value your privacy</h3>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowBanner(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-black hover:text-black"
                 >
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              
-              <p className="text-gray-600 mb-4">
-                We use cookies to enhance your browsing experience, analyze our traffic, and personalize content. 
-                By clicking &quot;Accept All&quot;, you consent to our use of cookies. You can manage your preferences by clicking &quot;Settings&quot;.
+              <p className="text-black mb-4 text-sm">
+                We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. <br />
+                By clicking &quot;Accept All,&quot; you consent to our use of cookies. You can also choose &quot;Reject All&quot; or &quot;Customize Settings&quot; to control your preferences.
               </p>
-              
-              <div className="text-sm text-gray-500 mb-6">
+              <div className="text-sm text-black mb-6">
                 Read our{' '}
-                <Link href="/privacy-policy" className="text-green-600 hover:underline">
+                <Link href="/privacy-policy" className="text-[#9ED95D] hover:underline">
                   Privacy Policy
                 </Link>
                 {' '}and{' '}
-                <Link href="/cookies-policy" className="text-green-600 hover:underline">
+                <Link href="/cookies-policy" className="text-[#9ED95D] hover:underline">
                   Cookies Policy
                 </Link>
                 {' '}for more information.
               </div>
-              
               <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={handleAcceptAll}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-[#9ED95D] hover:bg-[#8BC34A] text-black"
                 >
                   Accept All
                 </Button>
                 <Button
                   onClick={handleRejectAll}
                   variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="border-gray-300 text-black hover:bg-gray-50"
                 >
                   Reject All
                 </Button>
                 <Button
                   onClick={() => setShowSettings(true)}
                   variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="border-gray-300 text-[#9ED95D] hover:bg-gray-50"
                 >
                   <Settings className="w-4 h-4 mr-2" />
-                  Settings
+                  Customize Settings
                 </Button>
               </div>
             </div>
@@ -165,40 +162,40 @@ export default function CookieBanner() {
             // Settings panel
             <div>
               <div className="flex items-start justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Cookie Settings</h3>
+                <h3 className="text-md font-semibold text-black">Customize Settings</h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowSettings(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-black hover:text-black"
                 >
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              
               <div className="space-y-6">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">Essential Cookies</h4>
-                    <p className="text-sm text-gray-600">
-                      Required for basic site functionality. Always enabled.
+                    <h4 className="font-medium text-black">Necessary Cookies</h4>
+                    <p className="text-xs text-black">
+                      These cookies are essential for the website to function and cannot be switched off in our systems. They are usually only set in response to actions you take, such as setting your privacy preferences, logging in, or filling out forms. Without these cookies, parts of our site will not work properly.
                     </p>
+                     
                   </div>
-                  <div className="flex items-center">
+                  <div className="grid place-items-center grid-cols-2">
                     <input
                       type="checkbox"
                       checked={preferences.essential}
                       disabled
-                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                    />
+                      className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D]"
+                      />
+                      <span className="inline-block text-xs text-[#9ED95D] p-2 font-semibold mt-1">Always Active</span>
                   </div>
                 </div>
-                
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg">
                   <div>
-                    <h4 className="font-medium text-gray-900">Analytics Cookies</h4>
-                    <p className="text-sm text-gray-600">
-                      Help us understand how you use our site (Google Analytics).
+                    <h4 className="font-medium text-black">Analytics Cookies</h4>
+                    <p className="text-xs text-black">
+                      These cookies help us understand how visitors interact with our website. We use them to count visits, measure traffic sources, and improve our performance. They show us which pages are most and least popular and how visitors move around the site.
                     </p>
                   </div>
                   <div className="flex items-center">
@@ -209,16 +206,15 @@ export default function CookieBanner() {
                         ...preferences,
                         analytics: e.target.checked
                       })}
-                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                        className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-4"
                     />
                   </div>
                 </div>
-                
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg ">
                   <div>
-                    <h4 className="font-medium text-gray-900">Marketing Cookies</h4>
-                    <p className="text-sm text-gray-600">
-                      Used for advertising and retargeting (Meta Pixel).
+                    <h4 className="font-medium text-black">Marketing Cookies</h4>
+                    <p className="text-xs text-black">
+                      These cookies may be set by our advertising and marketing partners, such as Meta (Facebook) and HubSpot. They may be used to build a profile of your interests, deliver relevant advertising on other websites, and measure the effectiveness of campaigns.
                     </p>
                   </div>
                   <div className="flex items-center">
@@ -229,25 +225,41 @@ export default function CookieBanner() {
                         ...preferences,
                         marketing: e.target.checked
                       })}
-                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                        className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-4"
+                    />
+                  </div>
+                </div>
+                  <div className="flex items-center justify-between p-4 bg-[#F0FFDF] rounded-lg ">
+                  <div>
+                    <h4 className="font-medium text-black">Functional Cookies</h4>
+                    <p className="text-sm text-black">
+                      These cookies enable enhanced functionality and personalization, such as remembering your preferences or integrating with third-party services. If you do not allow these cookies, some or all of these services may not function properly.
+                    </p>
+                  </div>
+                  <div className="flex mx-4 items-center">
+                    <input
+                      type="checkbox"
+                      checked={false}
+                      disabled
+                        className="w-4 h-4 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] opacity-50 cursor-not-allowed"
                     />
                   </div>
                 </div>
               </div>
-              
-              <div className="flex gap-3 mt-6">
-                <Button
-                  onClick={handleAcceptSelected}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+              <div className="flex justify-end gap-3 mt-6">
+                  <Button
+                    onClick={() => setShowSettings(false)}
+                  
+                  className="bg-[#9ED95D] hover:bg-[#8BC34A] text-white"
                 >
-                  Save Preferences
+                 Back
                 </Button>
                 <Button
-                  onClick={() => setShowSettings(false)}
+                  onClick={handleAcceptSelected}
                   variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="border-gray-300 text-black hover:bg-gray-50"
                 >
-                  Cancel
+                  Save Preferences
                 </Button>
               </div>
             </div>

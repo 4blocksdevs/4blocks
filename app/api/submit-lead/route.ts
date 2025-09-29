@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     console.log('Lead submitted:', { name, email, source });
 
     // Send email with PDF (implement email service)
-    await sendWelcomeEmail(email, name);
+    //await sendWelcomeEmail(email, name);
 
     return NextResponse.json({ 
       success: true, 

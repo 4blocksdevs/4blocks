@@ -47,6 +47,9 @@ export default function LandingPage() {
 
     try {
       // Track lead event
+
+     
+      
       if (typeof window !== 'undefined') {
         if (window.gtag) {
           window.gtag('event', 'Lead', {
@@ -84,6 +87,7 @@ export default function LandingPage() {
         throw new Error('Form submission failed');
       }
     } catch (error) {
+      router.push('/thank-you');
       console.error('Error submitting form:', error);
       alert('There was an error submitting your information. Please try again.');
     } finally {
@@ -133,7 +137,7 @@ export default function LandingPage() {
               width={42}
               height={48}
             />
-            {/* <span className="text-white font-bold text-sm">4</span> */}
+           
           </div>
           <span className="ml-2 text-2xl font-bold text-black">BLOCKS</span>
         </div>
@@ -142,7 +146,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-12 lg:py-20">
         <div className="space-y-4 text-center">
-          <h1 className="text-3xl lg:text-5xl font-bold text-black leading-tight">
+          <h1 className="text-4xl lg:text-5xl font-bold text-black leading-tight">
             Download your free{' '}
             <span className="text-[#9ED95D]">MVP</span>
             <br />
