@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -49,15 +48,15 @@ export default function CookieBanner() {
 
       // Initialize Meta Pixel if marketing cookies accepted
       if (prefs.marketing) {
-        !function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+        (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
           if(f.fbq)return;n=f.fbq=function(){n.callMethod?
           n.callMethod.apply(n,arguments):n.queue.push(arguments)};
           if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
           n.queue=[];t=b.createElement(e);t.async=!0;
           t.src=v;s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s)
-        }(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
+        })(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
         
         window.fbq('init', 'YOUR_PIXEL_ID');
         window.fbq('track', 'PageView');
@@ -123,7 +122,7 @@ export default function CookieBanner() {
               
               <p className="text-gray-600 mb-4">
                 We use cookies to enhance your browsing experience, analyze our traffic, and personalize content. 
-                By clicking "Accept All", you consent to our use of cookies. You can manage your preferences by clicking "Settings".
+                By clicking &quot;Accept All&quot;, you consent to our use of cookies. You can manage your preferences by clicking &quot;Settings&quot;.
               </p>
               
               <div className="text-sm text-gray-500 mb-6">

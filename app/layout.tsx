@@ -2,10 +2,12 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
+import Footer from '../components/footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://4blocks.xyz'),
   title: 'Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks',
   description: 'Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money. Created by 4Blocks Italian software experts.',
   keywords: 'MVP roadmap, startup guide, product development, software development, 4Blocks, Italian software solutions, minimum viable product, startup strategy',
@@ -146,7 +148,10 @@ export default function RootLayout({
           />
         </noscript>
         
-        {children}
+        <div className="max-w-7xl mx-auto w-full">
+          {children}
+        </div>
+  <Footer />
       </body>
     </html>
   );
