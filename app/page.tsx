@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Download, Rocket, Users, Clock, Target } from 'lucide-react';
 import Image from 'next/image';
@@ -68,15 +68,24 @@ export default function LandingPage() {
       }
 
       // Submit to CRM (replace with actual CRM integration)
-      const response = await fetch('/api/submit-lead', {
+      // const response = await fetch('/api/submit-lead', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     name: formData.name,
+      //     email: formData.email,
+      //     source: 'MVP Roadmap Landing Page'
+      //   }),
+      // });
+
+      const response = await fetch('https://forms.hubspot.com/uploads/form/v2/146982667/3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
           email: formData.email,
-          source: 'MVP Roadmap Landing Page'
+          firstname: formData.name,
         }),
       });
 

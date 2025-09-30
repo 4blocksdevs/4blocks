@@ -25,6 +25,24 @@ const Footer = () => {
           <div>
             <h3 className="text-sm text-black font-semibold mb-2">CONTACTS</h3>
             <p className="text-black text-xs">info@4blocks.xyz</p>
+            <div className="flex items-center mt-1">
+              <Image
+                src="/Whatsapp.svg"
+                alt="WhatsApp"
+                width={20}
+                height={20}
+                className="mr-1"
+              />
+              <a
+                href="https://wa.me/393883786104"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-black text-xs hover:underline ml-1"
+              >
+                +39 388 378 6104
+              </a>
+            </div>
+            
           </div>
 
           <div>
