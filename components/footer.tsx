@@ -36,7 +36,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <div className="mt-8 text-center text-black text-xs mb-4">
+        <div className="mt-24 text-center text-black text-xs mb-4">
           &copy; {new Date().getFullYear()} 4BLOCKS Software Development LLC. All rights reserved. Made in Italy.
         </div>
       </div>

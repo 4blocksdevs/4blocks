@@ -362,7 +362,7 @@ export default function ThankYouPage() {
                     <iframe
                       src="https://calendly.com/your-calendly-username/30min"
                       width="100%"
-                      height="210"
+                      height="310"
                       frameBorder="0"
                       title="Book a 30 Minute Meeting with 4Blocks"
                       style={{ minWidth: '160px', borderRadius: '0.5rem', border: '1px solid #9ED95D', boxShadow: '0 2px 16px 0 #b6e89a33' }}

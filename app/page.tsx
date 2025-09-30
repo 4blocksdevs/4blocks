@@ -283,7 +283,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 max-w-4xl container mx-auto gap-8">
             <Card className="p-4 border border-[#e4ffc8] bg-white shadow-lg">
               <CardContent className="text-center p-0">
                 <div className="w-12 h-12 flex items-center justify-center mx-auto mb-2">
