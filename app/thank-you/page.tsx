@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Script from "next/script";
+import { useSearchParams } from "next/navigation";
 
 declare global {
   interface Window {
@@ -25,11 +26,10 @@ declare global {
 
 const initialFormData = { email: "" };
 
-interface ThankYouPageProps {
-  type?: 'roadmap' | 'checklist';
-}
-
-export default function ThankYouPage({ type = 'checklist' }: ThankYouPageProps) {
+export default function ThankYouPage() {
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type') === 'checklist' ? 'checklist' : 'roadmap';
+  
   const [email, setEmail] = useState("");
   const [formData, setFormData] = useState(initialFormData);
 
