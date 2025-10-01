@@ -123,7 +123,7 @@ export default function ChecklistPage() {
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <div>
             <h2 className="text-2xl font-bold text-black mb-4">
-              What's Inside:
+              What&apos;s Inside:
             </h2>
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
