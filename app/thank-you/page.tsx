@@ -151,6 +151,8 @@ export default function ThankYouPage() {
       if (window.fbq) {
         window.fbq("track", "Schedule");
       }
+
+      window.open("https://calendly.com/4blocksdevs/30min", "_blank", "noopener,noreferrer");
     }
   };
 
@@ -415,7 +417,7 @@ export default function ThankYouPage() {
                   <div className="flex justify-center items-center">
                     {/* Calendly Inline Widget */}
                     <iframe
-                      src="https://calendly.com/your-calendly-username/30min"
+                      src="https://calendly.com/4blocksdevs/30min"
                       width="100%"
                       height="310"
                       frameBorder="0"
