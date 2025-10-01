@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Download, Rocket, Users, Clock, Target } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import CookieBanner from '@/components/CookieBanner';
+import Form1 from '@/components/Form1';
+import Form2 from '@/components/Form2';
+import UTMTracker from '@/lib/utm-tracker';
+import { trackingEvents } from '@/lib/tracking-config';
 
 declare global {
   interface Window {
@@ -25,6 +28,9 @@ export default function LandingPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Initialize UTM tracking
+    UTMTracker.initialize();
+    
     // Track page view
     if (typeof window !== 'undefined') {
       // Google Analytics
@@ -32,12 +38,13 @@ export default function LandingPage() {
         window.gtag('config', 'GA_MEASUREMENT_ID', {
           page_title: 'MVP Roadmap Landing Page',
           page_location: window.location.href,
+          ...UTMTracker.getAttributionForGA()
         });
       }
       
       // Meta Pixel
       if (window.fbq) {
-        window.fbq('track', 'PageView');
+        window.fbq('track', 'PageView', UTMTracker.getAttributionForMetaPixel());
       }
     }
   }, []);
@@ -197,46 +204,11 @@ export default function LandingPage() {
           <div >
             
 
-            {/* Download Form */}
-            <Card className="p-4 mx-2 shadow-lg border bg-white border-[#9ED95D]">
-              <CardContent className="p-0">
-                <form id="mainForm" onSubmit={handleSubmit} className="space-y-4">
-                  <div className='mt-4'>
-                    {/* <Label htmlFor="name" className="text-gray-700 text-xl">Name</Label> */}
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                      className="mt-1 focus:outline-none text-base border-[#9ED95D] border"
-                    />
-                  </div>
-                  <div className='mt-4'>
-                    {/* <Label htmlFor="email" className="text-gray-700  text-xl">Email</Label> */}
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                      className="mt-1 focus:outline-none text-base border-[#9ED95D] border"
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="mt-2 bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-semibold py-2 px-4 text-base"
-                    >
-                      {isSubmitting ? 'PROCESSING...' : 'GET INSTANT ACCESS'}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+            {/* Primary Lead Form */}
+            <Form1 onSubmissionSuccess={() => {
+              // Track successful form submission
+              console.log('Form 1 submitted successfully');
+            }} />
           </div>
 
           <div className="flex justify-center">
@@ -382,29 +354,14 @@ export default function LandingPage() {
 
           {/* CTA Section */}
           <div className="bg-[#9ED95D] container mx-auto rounded-md max-w-xl p-6 m-8">
-
             <div className="text-center">
-              <form id="bottomForm" onSubmit={handleDirectDownload} className="space-y-2">
-                <div className='flex flex-col md:flex-row items-center gap-2'>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                    className="focus:outline-none text-base border-[#9ED95D] border"
-                  />
-                  <Button
-                    type='submit'
-                    id="pdfDownloadButton"
-                    className="bg-white text-black hover:bg-gray-100 font-semibold px-4 py-3 text-base"
-                  >
-                    <Download className="w-4 h-4 mr-1" />
-                    DOWNLOAD PDF
-                  </Button>
-                </div>
-              </form>
+              <Form2 
+                className=""
+                onSubmissionSuccess={() => {
+                  console.log('Form 2 submitted successfully - PDF download triggered');
+                }}
+                showDownloadButton={true}
+              />
             </div>
           </div>
         </div>

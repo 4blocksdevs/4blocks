@@ -1,0 +1,82 @@
+// Tracking Configuration
+// Centralized configuration for all tracking services
+// Update these values with your actual tracking IDs
+
+export const trackingConfig = {
+  hubspot: {
+    portalId: 'YOUR_PORTAL_ID', // Replace with your HubSpot Portal ID
+    form1Id: 'FORM_1_ID', // Replace with your Form 1 ID 
+    form2Id: 'FORM_2_ID', // Replace with your Form 2 ID
+  },
+  metaPixel: {
+    pixelId: '4277236155853060', // Replace with your Meta Pixel ID
+  },
+  googleAnalytics: {
+    measurementId: 'GA_MEASUREMENT_ID', // Replace with your GA4 Measurement ID
+  },
+  googleTagManager: {
+    gtmId: 'GTM-XXXXXX', // Replace with your GTM Container ID
+  },
+  isDevelopment: typeof window !== 'undefined' && window.location.hostname === 'localhost'
+};
+
+// Form submission tracking events
+export const trackingEvents = {
+  form1: {
+    metaPixel: {
+      event: 'Lead',
+      parameters: {
+        form_type: 'Form 1',
+        content_name: 'MVP Roadmap Primary Form',
+        content_category: 'Lead Generation'
+      }
+    },
+    googleAnalytics: {
+      event: 'generate_lead',
+      parameters: {
+        event_category: 'Form',
+        event_label: 'Form 1 Submission',
+        form_type: 'primary'
+      }
+    }
+  },
+  form2: {
+    metaPixel: {
+      event: 'Lead',
+      parameters: {
+        form_type: 'Form 2',
+        content_name: 'MVP Roadmap Secondary Form',
+        content_category: 'Lead Generation'
+      }
+    },
+    googleAnalytics: {
+      event: 'generate_lead',
+      parameters: {
+        event_category: 'Form',
+        event_label: 'Form 2 Submission',
+        form_type: 'secondary'
+      }
+    }
+  },
+  pdfDownload: {
+    metaPixel: {
+      event: 'Purchase',
+      parameters: {
+        content_name: 'MVP Roadmap PDF',
+        content_type: 'product',
+        value: 0,
+        currency: 'USD'
+      }
+    },
+    googleAnalytics: {
+      event: 'file_download',
+      parameters: {
+        event_category: 'PDF',
+        event_label: 'MVP Roadmap Download',
+        file_name: 'mvp-roadmap.pdf'
+      }
+    }
+  }
+};
+
+export default trackingConfig;

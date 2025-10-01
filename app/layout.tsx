@@ -1,49 +1,54 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import Script from 'next/script';
-import Footer from '../components/footer';
-import Image from 'next/image';
+import React from "react";
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import Script from "next/script";
+import Footer from "../components/footer";
+import Image from "next/image";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://4blocks.xyz'),
-  title: 'Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks',
-  description: 'Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money. Created by 4Blocks Italian software experts.',
-  keywords: 'MVP roadmap, startup guide, product development, software development, 4Blocks, Italian software solutions, minimum viable product, startup strategy',
-  authors: [{ name: '4Blocks', url: 'https://4blocks.xyz' }],
-  creator: '4Blocks',
-  publisher: '4Blocks',
-  robots: 'index, follow',
+  metadataBase: new URL("https://4blocks.xyz"),
+  title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+  description:
+    "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money. Created by 4Blocks Italian software experts.",
+  keywords:
+    "MVP roadmap, startup guide, product development, software development, 4Blocks, Italian software solutions, minimum viable product, startup strategy",
+  authors: [{ name: "4Blocks", url: "https://4blocks.xyz" }],
+  creator: "4Blocks",
+  publisher: "4Blocks",
+  robots: "index, follow",
   alternates: {
-    canonical: 'https://4blocks.xyz'
+    canonical: "https://4blocks.xyz",
   },
   openGraph: {
-    title: 'Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks',
-    description: 'Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.',
-    url: 'https://4blocks.xyz',
-    siteName: '4Blocks',
+    title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+    description:
+      "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.",
+    url: "https://4blocks.xyz",
+    siteName: "4Blocks",
     images: [
       {
-        url: '/og-image.jpg', // You'll need to add this image
+        url: "/og-image.jpg", // You'll need to add this image
         width: 1200,
         height: 630,
-        alt: '4Blocks MVP Roadmap PDF',
-      }
+        alt: "4Blocks MVP Roadmap PDF",
+      },
     ],
-    locale: 'en_US',
-    type: 'website',
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks',
-    description: 'Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.',
-    creator: '@4blocks',
-    images: ['/og-image.jpg'],
+    card: "summary_large_image",
+    title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+    description:
+      "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.",
+    creator: "@4blocks",
+    images: ["/og-image.jpg"],
   },
   verification: {
-    google: 'your-google-verification-code', // Add your Google Search Console verification
+    google: "your-google-verification-code", // Add your Google Search Console verification
   },
 };
 
@@ -109,6 +114,12 @@ export default function RootLayout({
           }}
         />
 
+        {/* HubSpot Tracking Script */}
+        <Script
+          src="//js.hsforms.net/forms/v2.js"
+          strategy="afterInteractive"
+        />
+
         {/* Schema.org structured data */}
         <Script
           id="structured-data"
@@ -117,23 +128,23 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "4Blocks",
-              "url": "https://4blocks.xyz",
-              "logo": "https://4blocks.xyz/logo.png",
-              "description": "Italian Software Solutions for Businesses",
-              "contactPoint": {
+              name: "4Blocks",
+              url: "https://4blocks.xyz",
+              logo: "https://4blocks.xyz/logo.png",
+              description: "Italian Software Solutions for Businesses",
+              contactPoint: {
                 "@type": "ContactPoint",
-                "email": "info@4blocks.xyz",
-                "contactType": "Customer Service"
+                email: "info@4blocks.xyz",
+                contactType: "Customer Service",
               },
-              "address": {
+              address: {
                 "@type": "PostalAddress",
-                "addressCountry": "IT"
+                addressCountry: "IT",
               },
-              "sameAs": [
+              sameAs: [
                 "https://linkedin.com/company/4blocks",
-                "https://twitter.com/4blocks"
-              ]
+                "https://twitter.com/4blocks",
+              ],
             }),
           }}
         />
@@ -145,7 +156,7 @@ export default function RootLayout({
             src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXX"
             height="0"
             width="0"
-            style={{ display: 'none', visibility: 'hidden' }}
+            style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
         {/* Meta Pixel (noscript) */}
@@ -156,25 +167,32 @@ export default function RootLayout({
           }}
         />
         <div className="max-w-5xl mx-auto w-full">
-        {/* Header */}
-        <header className="container mx-auto px-4 py-6">
-          <a href="/" className="block w-fit" tabIndex={0} aria-label="Go to homepage">
-            <div className="flex items-center cursor-pointer">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center">
-                <Image
-                  src="/logo.svg"
-                  alt="4Blocks Logo"
-                  width={42}
-                  height={48}
-                />
+          {/* Header */}
+          <header className="container mx-auto px-4 py-6">
+            <a
+              href="/"
+              className="block w-fit"
+              tabIndex={0}
+              aria-label="Go to homepage"
+            >
+              <div className="flex items-center cursor-pointer">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center">
+                  <Image
+                    src="/logo.svg"
+                    alt="4Blocks Logo"
+                    width={42}
+                    height={48}
+                  />
+                </div>
+                <span className="ml-2 text-2xl font-bold text-black">
+                  BLOCKS
+                </span>
               </div>
-              <span className="ml-2 text-2xl font-bold text-black">BLOCKS</span>
-            </div>
-          </a>
-        </header>
+            </a>
+          </header>
           {children}
         </div>
-  <Footer />
+        <Footer />
       </body>
     </html>
   );
