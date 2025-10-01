@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import type { FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Check, Download, Rocket, Users, Clock, Target } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import CookieBanner from '@/components/CookieBanner';
-import Form1 from '@/components/Form1';
-import Form2 from '@/components/Form2';
-import UTMTracker from '@/lib/utm-tracker';
-import { trackingEvents } from '@/lib/tracking-config';
+import { useState, useEffect } from "react";
+import type { FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, Download, Rocket, Users, Clock, Target } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import CookieBanner from "@/components/CookieBanner";
+import Form1 from "@/components/Form1";
+import Form2 from "@/components/Form2";
+import UTMTracker from "@/lib/utm-tracker";
+import { trackingEvents } from "@/lib/tracking-config";
 
 declare global {
   interface Window {
@@ -23,67 +23,75 @@ declare global {
 }
 
 export default function LandingPage() {
-  const [formData, setFormData] = useState({ name: '', email: '' });
+  const [formData, setFormData] = useState({ name: "", email: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     // Initialize UTM tracking
     UTMTracker.initialize();
-    
+
     // Track page view
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Google Analytics
       if (window.gtag) {
-        window.gtag('config', 'GA_MEASUREMENT_ID', {
-          page_title: 'MVP Roadmap Landing Page',
+        window.gtag("config", "GA_MEASUREMENT_ID", {
+          page_title: "MVP Roadmap Landing Page",
           page_location: window.location.href,
-          ...UTMTracker.getAttributionForGA()
+          ...UTMTracker.getAttributionForGA(),
         });
       }
-      
+
       // Meta Pixel
       if (window.fbq) {
-        window.fbq('track', 'PageView', UTMTracker.getAttributionForMetaPixel());
+        window.fbq(
+          "track",
+          "PageView",
+          UTMTracker.getAttributionForMetaPixel()
+        );
       }
     }
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
-    const mainForm = document.getElementById('mainForm') as HTMLFormElement | null;
-    const bottomForm = document.getElementById('bottomForm') as HTMLFormElement | null;
-    const pdfButton = document.getElementById('pdfDownloadButton');
+    const mainForm = document.getElementById(
+      "mainForm"
+    ) as HTMLFormElement | null;
+    const bottomForm = document.getElementById(
+      "bottomForm"
+    ) as HTMLFormElement | null;
+    const pdfButton = document.getElementById("pdfDownloadButton");
 
     const leadHandler = () => {
       if (window.fbq) {
-        window.fbq('track', 'Lead');
+        window.fbq("track", "Lead");
       }
     };
 
     const downloadHandler = () => {
       if (window.fbq) {
-        window.fbq('track', 'Download');
+        window.fbq("track", "Download");
       }
     };
 
     const pdfDownloadHandler = () => {
       if (window.fbq) {
-        window.fbq('track', 'PDFDownload');
+        window.fbq("track", "PDFDownload");
       }
     };
 
-    mainForm?.addEventListener('submit', leadHandler);
-    bottomForm?.addEventListener('submit', downloadHandler);
-    pdfButton?.addEventListener('click', pdfDownloadHandler);
+    mainForm?.addEventListener("submit", leadHandler);
+    bottomForm?.addEventListener("submit", downloadHandler);
+    pdfButton?.addEventListener("click", pdfDownloadHandler);
 
     return () => {
-      mainForm?.removeEventListener('submit', leadHandler);
-      bottomForm?.removeEventListener('submit', downloadHandler);
-      pdfButton?.removeEventListener('click', pdfDownloadHandler);
+      mainForm?.removeEventListener("submit", leadHandler);
+      bottomForm?.removeEventListener("submit", downloadHandler);
+      pdfButton?.removeEventListener("click", pdfDownloadHandler);
     };
   }, []);
 
@@ -94,21 +102,19 @@ export default function LandingPage() {
     try {
       // Track lead event
 
-     
-      
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         if (window.gtag) {
-          window.gtag('event', 'Lead', {
-            event_category: 'engagement',
-            event_label: 'MVP Roadmap Download',
-            value: 1
+          window.gtag("event", "Lead", {
+            event_category: "engagement",
+            event_label: "MVP Roadmap Download",
+            value: 1,
           });
         }
-        
+
         if (window.fbq) {
-          window.fbq('track', 'Lead', {
-            content_name: 'MVP Roadmap PDF',
-            content_category: 'Lead Magnet'
+          window.fbq("track", "Lead", {
+            content_name: "MVP Roadmap PDF",
+            content_category: "Lead Magnet",
           });
         }
       }
@@ -126,25 +132,30 @@ export default function LandingPage() {
       //   }),
       // });
 
-      const response = await fetch('https://forms.hubspot.com/uploads/form/v2/146982667/3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          email: formData.email,
-          name: formData.name,
-        }),
-      });
+      const response = await fetch(
+        "https://forms.hubspot.com/uploads/form/v2/146982667/3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            email: formData.email,
+            name: formData.name,
+          }),
+        }
+      );
 
       if (response.ok) {
         // Redirect to thank you page
-        router.push('/thank-you');
+        router.push("/thank-you");
       } else {
-        throw new Error('Form submission failed');
+        throw new Error("Form submission failed");
       }
     } catch (error) {
-      router.push('/thank-you');
-      console.error('Error submitting form:', error);
-      alert('There was an error submitting your information. Please try again.');
+      router.push("/thank-you");
+      console.error("Error submitting form:", error);
+      alert(
+        "There was an error submitting your information. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -153,44 +164,41 @@ export default function LandingPage() {
   const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Track download event
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       if (window.gtag) {
-        window.gtag('event', 'Download', {
-          event_category: 'engagement',
-          event_label: 'Direct MVP Roadmap Download',
-          value: 1
+        window.gtag("event", "Download", {
+          event_category: "engagement",
+          event_label: "Direct MVP Roadmap Download",
+          value: 1,
         });
       }
-      
+
       if (window.fbq) {
-        window.fbq('track', 'Purchase', {
-          content_name: 'MVP Roadmap PDF',
-          content_type: 'product',
+        window.fbq("track", "Purchase", {
+          content_name: "MVP Roadmap PDF",
+          content_type: "product",
           value: 0,
-          currency: 'USD'
+          currency: "USD",
         });
       }
     }
 
     // Trigger PDF download
-    const link = document.createElement('a');
-    link.href = '/mvp-roadmap.pdf'; // Replace with actual PDF path
-    link.download = 'MVP-Roadmap-4Blocks.pdf';
+    const link = document.createElement("a");
+    link.href = "/mvp-roadmap.pdf"; // Replace with actual PDF path
+    link.download = "MVP-Roadmap-4Blocks.pdf";
     link.click();
   };
 
   return (
     <div className="min-h-screen bg-white">
       <CookieBanner />
-      
-      
 
       {/* Hero Section */}
       <section className="container max-w-3xl mx-auto px-4 py-6 lg:py-4">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl lg:text-4xl font-bold text-black leading-tight">
-            Download your free{' '}
-            <span className="text-[#9ED95D]">MVP</span>
+            Download your free <span className="text-[#9ED95D]">MVP</span>
             <br />
             roadmap PDF
           </h1>
@@ -201,14 +209,14 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="grid lg:grid-cols-2 gap-6 items-center mt-4">
-          <div >
-            
-
+          <div>
             {/* Primary Lead Form */}
-            <Form1 onSubmissionSuccess={() => {
-              // Track successful form submission
-              console.log('Form 1 submitted successfully');
-            }} />
+            <Form1
+              onSubmissionSuccess={() => {
+                // Track successful form submission
+                console.log("Form 1 submitted successfully");
+              }}
+            />
           </div>
 
           <div className="flex justify-center">
@@ -232,11 +240,12 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-  <section className="bg-white max-w-4xl container mx-auto py-8">
+      <section className="bg-white max-w-4xl container mx-auto py-8">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-xl lg:text-2xl space-y-1 font-bold text-black mb-2">
-              Your Shortcut to a Winning <span className="text-[#9ED95D]">MVP</span>
+              Your Shortcut to a Winning{" "}
+              <span className="text-[#9ED95D]">MVP</span>
               <br />
               Designed by 4Blocks Experts
             </h2>
@@ -255,7 +264,9 @@ export default function LandingPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg text-black mb-1">Learn the exact 7 steps to a successful MVP launch</h3>
+                    <h3 className="text-lg text-black mb-1">
+                      Learn the exact 7 steps to a successful MVP launch
+                    </h3>
                   </div>
                 </div>
               </CardContent>
@@ -273,7 +284,10 @@ export default function LandingPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg text-black mb-1">Avoid the costliest founder mistakes (validated by real-world projects)</h3>
+                    <h3 className="text-lg text-black mb-1">
+                      Avoid the costliest founder mistakes (validated by
+                      real-world projects)
+                    </h3>
                   </div>
                 </div>
               </CardContent>
@@ -291,7 +305,9 @@ export default function LandingPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg text-black mb-1">Discover how top startups test, iterate, and scale fast</h3>
+                    <h3 className="text-lg text-black mb-1">
+                      Discover how top startups test, iterate, and scale fast
+                    </h3>
                   </div>
                 </div>
               </CardContent>
@@ -300,7 +316,8 @@ export default function LandingPage() {
 
           <div className="text-center my-12">
             <p className="text-base font-bold text-black italic mb-4 max-w-2xl mx-auto">
-              &quot;Created by 4Blocks — the product studio behind dozens of successful SaaS, AI, and blockchain MVPs.&quot;
+              &quot;Created by 4Blocks — the product studio behind dozens of
+              successful SaaS, AI, and blockchain MVPs.&quot;
             </p>
           </div>
 
@@ -308,21 +325,20 @@ export default function LandingPage() {
             <Card className="p-4 border border-[#e4ffc8] bg-white shadow-lg">
               <CardContent className="text-center p-0">
                 <div className="w-12 h-12 flex items-center justify-center mx-auto mb-2">
-                  <Image
-                    src="/task.svg"
-                    alt="Roadmap"
-                    width={40}
-                    height={40}
-                  />
+                  <Image src="/task.svg" alt="Roadmap" width={40} height={40} />
                 </div>
-                <h3 className="font-bold text-black mb-1 text-base">Clear Step-by-Step Guidance</h3>
-                <p className="text-black text-sm">Follow a proven roadmap from idea to launch with step-by-step clarity.</p>
+                <h3 className="font-bold text-black mb-1 text-base">
+                  Clear Step-by-Step Guidance
+                </h3>
+                <p className="text-black text-sm">
+                  Follow a proven roadmap from idea to launch with step-by-step
+                  clarity.
+                </p>
               </CardContent>
             </Card>
 
             <Card className="p-4 border border-[#e4ffc8] bg-white shadow-lg">
               <CardContent className="text-center p-0">
-                
                 <div className="w-12 h-12 flex items-center justify-center mx-auto mb-2">
                   <Image
                     src="/lightning.svg"
@@ -331,8 +347,12 @@ export default function LandingPage() {
                     height={40}
                   />
                 </div>
-                <h3 className="font-bold text-black mb-1 text-base">Actionable & Practical</h3>
-                <p className="text-black text-sm">Download and start applying actionable steps immediately.</p>
+                <h3 className="font-bold text-black mb-1 text-base">
+                  Actionable & Practical
+                </h3>
+                <p className="text-black text-sm">
+                  Download and start applying actionable steps immediately.
+                </p>
               </CardContent>
             </Card>
 
@@ -346,8 +366,12 @@ export default function LandingPage() {
                     height={40}
                   />
                 </div>
-                <h3 className="font-bold text-black mb-1 text-base">Time-Saving Insights</h3>
-                <p className="text-black text-sm">Skip months of trial-and-error with a roadmap that works.</p>
+                <h3 className="font-bold text-black mb-1 text-base">
+                  Time-Saving Insights
+                </h3>
+                <p className="text-black text-sm">
+                  Skip months of trial-and-error with a roadmap that works.
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -355,10 +379,12 @@ export default function LandingPage() {
           {/* CTA Section */}
           <div className="bg-[#9ED95D] container mx-auto rounded-md max-w-xl p-6 m-8">
             <div className="text-center">
-              <Form2 
+              <Form2
                 className=""
                 onSubmissionSuccess={() => {
-                  console.log('Form 2 submitted successfully - PDF download triggered');
+                  console.log(
+                    "Form 2 submitted successfully - PDF download triggered"
+                  );
                 }}
                 showDownloadButton={true}
               />
@@ -366,8 +392,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      
     </div>
   );
 }

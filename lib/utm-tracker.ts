@@ -20,20 +20,20 @@ export interface AttributionData extends UTMParameters {
 }
 
 class UTMTracker {
-  private static readonly STORAGE_KEY = 'utm_attribution';
-  private static readonly SESSION_KEY = 'session_attribution';
+  private static readonly STORAGE_KEY = "utm_attribution";
+  private static readonly SESSION_KEY = "session_attribution";
   private static readonly UTM_EXPIRY_DAYS = 30;
 
   // UTM parameter names to track
   private static readonly UTM_PARAMS = [
-    'utm_source',
-    'utm_medium', 
-    'utm_campaign',
-    'utm_content',
-    'utm_term',
-    'utm_id',
-    'gclid',
-    'fbclid'
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_content",
+    "utm_term",
+    "utm_id",
+    "gclid",
+    "fbclid",
   ];
 
   /**
@@ -41,7 +41,7 @@ class UTMTracker {
    * Should be called on every page load to capture and persist UTM parameters
    */
   static initialize(): AttributionData | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
 
     const urlParams = this.getURLParameters();
     const hasUTMParams = Object.keys(urlParams).length > 0;
@@ -50,16 +50,16 @@ class UTMTracker {
       // New UTM parameters found, store them
       const attributionData: AttributionData = {
         ...urlParams,
-        referrer: document.referrer || 'direct',
+        referrer: document.referrer || "direct",
         landing_page: window.location.href,
         timestamp: new Date().toISOString(),
-        session_id: this.generateSessionId()
+        session_id: this.generateSessionId(),
       };
 
       this.storeAttribution(attributionData);
       this.storeSessionAttribution(attributionData);
-      
-      console.log('UTM Parameters captured:', attributionData);
+
+      console.log("UTM Parameters captured:", attributionData);
       return attributionData;
     }
 
@@ -81,7 +81,7 @@ class UTMTracker {
     const urlParams = new URLSearchParams(window.location.search);
     const utmData: UTMParameters = {};
 
-    this.UTM_PARAMS.forEach(param => {
+    this.UTM_PARAMS.forEach((param) => {
       const value = urlParams.get(param);
       if (value) {
         utmData[param as keyof UTMParameters] = value;
@@ -98,11 +98,11 @@ class UTMTracker {
     try {
       const storageData = {
         attribution: data,
-        expires: Date.now() + (this.UTM_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+        expires: Date.now() + this.UTM_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
       };
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(storageData));
     } catch (error) {
-      console.warn('Failed to store UTM attribution:', error);
+      console.warn("Failed to store UTM attribution:", error);
     }
   }
 
@@ -113,7 +113,7 @@ class UTMTracker {
     try {
       sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(data));
     } catch (error) {
-      console.warn('Failed to store session attribution:', error);
+      console.warn("Failed to store session attribution:", error);
     }
   }
 
@@ -126,7 +126,7 @@ class UTMTracker {
       if (!stored) return null;
 
       const { attribution, expires } = JSON.parse(stored);
-      
+
       // Check if expired
       if (Date.now() > expires) {
         localStorage.removeItem(this.STORAGE_KEY);
@@ -135,7 +135,7 @@ class UTMTracker {
 
       return attribution;
     } catch (error) {
-      console.warn('Failed to retrieve stored attribution:', error);
+      console.warn("Failed to retrieve stored attribution:", error);
       return null;
     }
   }
@@ -148,7 +148,7 @@ class UTMTracker {
       const stored = sessionStorage.getItem(this.SESSION_KEY);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
-      console.warn('Failed to retrieve session attribution:', error);
+      console.warn("Failed to retrieve session attribution:", error);
       return null;
     }
   }
@@ -168,7 +168,7 @@ class UTMTracker {
       localStorage.removeItem(this.STORAGE_KEY);
       sessionStorage.removeItem(this.SESSION_KEY);
     } catch (error) {
-      console.warn('Failed to clear attribution data:', error);
+      console.warn("Failed to clear attribution data:", error);
     }
   }
 
@@ -180,18 +180,22 @@ class UTMTracker {
     if (!attribution) return {};
 
     const hubspotData: Record<string, string> = {};
-    
+
     // Map UTM parameters to HubSpot field names
     if (attribution.utm_source) hubspotData.utm_source = attribution.utm_source;
     if (attribution.utm_medium) hubspotData.utm_medium = attribution.utm_medium;
-    if (attribution.utm_campaign) hubspotData.utm_campaign = attribution.utm_campaign;
-    if (attribution.utm_content) hubspotData.utm_content = attribution.utm_content;
+    if (attribution.utm_campaign)
+      hubspotData.utm_campaign = attribution.utm_campaign;
+    if (attribution.utm_content)
+      hubspotData.utm_content = attribution.utm_content;
     if (attribution.utm_term) hubspotData.utm_term = attribution.utm_term;
     if (attribution.utm_id) hubspotData.utm_id = attribution.utm_id;
     if (attribution.gclid) hubspotData.gclid = attribution.gclid;
     if (attribution.fbclid) hubspotData.fbclid = attribution.fbclid;
-    if (attribution.referrer) hubspotData.hs_analytics_source = attribution.referrer;
-    if (attribution.landing_page) hubspotData.hs_analytics_first_url = attribution.landing_page;
+    if (attribution.referrer)
+      hubspotData.hs_analytics_source = attribution.referrer;
+    if (attribution.landing_page)
+      hubspotData.hs_analytics_first_url = attribution.landing_page;
 
     return hubspotData;
   }
@@ -210,7 +214,7 @@ class UTMTracker {
       utm_content: attribution.utm_content,
       utm_term: attribution.utm_term,
       fbclid: attribution.fbclid,
-      referrer: attribution.referrer
+      referrer: attribution.referrer,
     };
   }
 
@@ -229,30 +233,33 @@ class UTMTracker {
       campaign_term: attribution.utm_term,
       campaign_id: attribution.utm_id,
       gclid: attribution.gclid,
-      referrer: attribution.referrer
+      referrer: attribution.referrer,
     };
   }
 
   /**
    * Track campaign performance metrics
    */
-  static trackCampaignEvent(eventName: string, additionalData: Record<string, any> = {}): void {
+  static trackCampaignEvent(
+    eventName: string,
+    additionalData: Record<string, any> = {}
+  ): void {
     const attribution = this.getAttribution();
     if (!attribution) return;
 
     // Send to Google Analytics
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', eventName, {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", eventName, {
         ...this.getAttributionForGA(),
-        ...additionalData
+        ...additionalData,
       });
     }
 
     // Send to Meta Pixel
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('trackCustom', eventName, {
+    if (typeof window !== "undefined" && window.fbq) {
+      window.fbq("trackCustom", eventName, {
         ...this.getAttributionForMetaPixel(),
-        ...additionalData
+        ...additionalData,
       });
     }
   }
@@ -261,12 +268,12 @@ class UTMTracker {
    * Debug method to log current attribution state
    */
   static debug(): void {
-    console.group('UTM Attribution Debug');
-    console.log('Current URL params:', this.getURLParameters());
-    console.log('Stored attribution:', this.getStoredAttribution());
-    console.log('Session attribution:', this.getSessionAttribution());
-    console.log('Active attribution:', this.getAttribution());
-    console.log('HubSpot format:', this.getAttributionForHubSpot());
+    console.group("UTM Attribution Debug");
+    console.log("Current URL params:", this.getURLParameters());
+    console.log("Stored attribution:", this.getStoredAttribution());
+    console.log("Session attribution:", this.getSessionAttribution());
+    console.log("Active attribution:", this.getAttribution());
+    console.log("HubSpot format:", this.getAttributionForHubSpot());
     console.groupEnd();
   }
 }

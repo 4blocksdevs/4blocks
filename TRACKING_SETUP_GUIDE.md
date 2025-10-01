@@ -5,7 +5,7 @@
 Your MVP landing page now has comprehensive tracking implemented with:
 
 - ✅ **HubSpot Forms Integration** (Form 1 & Form 2)
-- ✅ **Meta Pixel Event Tracking** 
+- ✅ **Meta Pixel Event Tracking**
 - ✅ **UTM Parameter Capture & Attribution**
 - ✅ **Google Analytics Enhanced Events**
 - ✅ **Automated Lead Pipeline Assignment**
@@ -13,21 +13,26 @@ Your MVP landing page now has comprehensive tracking implemented with:
 ## 📋 Setup Checklist
 
 ### 1. HubSpot Configuration
+
 **Status:** ⚠️ REQUIRED SETUP
 
 **Action Items:**
+
 1. **Get HubSpot Portal ID:**
+
    - Login to HubSpot
    - Go to Settings → Account & Billing → Account Information
    - Copy your Hub ID (Portal ID)
 
 2. **Create Form 1 (Primary Lead Form):**
+
    - Go to Marketing → Lead Capture → Forms
    - Create new form with fields: `First Name`, `Email`, `Phone`, `Company`
    - Copy the Form ID from the embed code
    - Set up notifications and pipeline assignment
 
 3. **Create Form 2 (Secondary CTA Form):**
+
    - Create another form with fields: `First Name`, `Email`
    - Copy the Form ID
    - Configure for same or separate pipeline
@@ -37,28 +42,32 @@ Your MVP landing page now has comprehensive tracking implemented with:
    // In lib/tracking-config.ts, replace:
    hubspot: {
      portalId: 'YOUR_ACTUAL_PORTAL_ID',
-     form1Id: 'YOUR_FORM_1_ID', 
+     form1Id: 'YOUR_FORM_1_ID',
      form2Id: 'YOUR_FORM_2_ID',
    }
    ```
 
 ### 2. Meta Pixel Configuration
+
 **Status:** ✅ IMPLEMENTED (using existing ID: 4277236155853060)
 
 **Verification:**
+
 - Meta Pixel is already configured in layout.tsx
 - Events will fire for: PageView, Lead (Form 1), Lead (Form 2), Purchase (PDF Download)
 - Test with Meta Pixel Helper browser extension
 
 ### 3. UTM Parameter Strategy
+
 **Status:** ✅ IMPLEMENTED
 
 **Usage Examples:**
+
 ```
 # Facebook/Instagram Campaigns
 https://4blocks.xyz/?utm_source=meta&utm_medium=cpc&utm_campaign=mvp_launch&utm_content=ad_variant_1
 
-# Google Ads Campaigns  
+# Google Ads Campaigns
 https://4blocks.xyz/?utm_source=google&utm_medium=cpc&utm_campaign=mvp_launch&utm_content=landing_page_cta
 
 # Email Campaigns
@@ -66,6 +75,7 @@ https://4blocks.xyz/?utm_source=email&utm_medium=newsletter&utm_campaign=mvp_lau
 ```
 
 **Attribution Features:**
+
 - ✅ 30-day attribution window
 - ✅ Cross-session persistence
 - ✅ Automatic HubSpot field mapping
@@ -76,21 +86,25 @@ https://4blocks.xyz/?utm_source=email&utm_medium=newsletter&utm_campaign=mvp_lau
 ### New Components Created:
 
 1. **`components/Form1.tsx`** - Primary lead capture form
+
    - Fields: Name, Email, Phone (optional), Company (optional)
    - HubSpot integration with fallback
    - Enhanced tracking and attribution
 
-2. **`components/Form2.tsx`** - Secondary CTA form  
+2. **`components/Form2.tsx`** - Secondary CTA form
+
    - Fields: Name, Email
    - Triggers PDF download
    - Minimal friction design
 
 3. **`lib/hubspot.ts`** - HubSpot integration utility
+
    - Form creation and submission
    - Event tracking coordination
    - Error handling and fallbacks
 
 4. **`lib/utm-tracker.ts`** - UTM parameter handler
+
    - Capture and persistence
    - Attribution formatting
    - Campaign performance tracking
@@ -103,6 +117,7 @@ https://4blocks.xyz/?utm_source=email&utm_medium=newsletter&utm_campaign=mvp_lau
 ## 🧪 Testing Instructions
 
 ### Pre-Testing Setup:
+
 1. **Update HubSpot IDs** in `lib/tracking-config.ts`
 2. **Install browser extensions:**
    - Meta Pixel Helper
@@ -112,6 +127,7 @@ https://4blocks.xyz/?utm_source=email&utm_medium=newsletter&utm_campaign=mvp_lau
 ### Test Cases:
 
 #### Test 1: UTM Parameter Capture
+
 ```bash
 # Visit with UTM parameters
 https://localhost:3000/?utm_source=test&utm_medium=cpc&utm_campaign=test_campaign
@@ -121,6 +137,7 @@ UTMTracker.debug()
 ```
 
 #### Test 2: Form 1 Submission (Primary)
+
 1. Fill out Form 1 with all fields
 2. Submit form
 3. **Expected Results:**
@@ -129,7 +146,8 @@ UTMTracker.debug()
    - GA4 'generate_lead' event
    - Redirect to `/thank-you`
 
-#### Test 3: Form 2 Submission (Secondary)  
+#### Test 3: Form 2 Submission (Secondary)
+
 1. Fill out Form 2 (minimal fields)
 2. Submit form
 3. **Expected Results:**
@@ -139,6 +157,7 @@ UTMTracker.debug()
    - Meta Pixel 'Purchase' event (value: 0)
 
 #### Test 4: Cross-Session Attribution
+
 1. Visit page with UTM parameters
 2. Close browser
 3. Return directly (without UTMs)
@@ -151,28 +170,30 @@ UTMTracker.debug()
 // In browser console:
 
 // Check UTM tracking
-UTMTracker.debug()
+UTMTracker.debug();
 
 // Check current attribution
-UTMTracker.getAttribution()
+UTMTracker.getAttribution();
 
 // Test Meta Pixel
-fbq('track', 'CustomEvent', {test: true})
+fbq("track", "CustomEvent", { test: true });
 
 // Test Google Analytics
-gtag('event', 'test_event', {test: true})
+gtag("event", "test_event", { test: true });
 ```
 
 ## 🎯 Campaign Setup Examples
 
 ### Facebook/Instagram Campaigns:
+
 ```
 Campaign: MVP Launch
-Ad Set: Lookalike Entrepreneurs  
+Ad Set: Lookalike Entrepreneurs
 UTMs: ?utm_source=meta&utm_medium=cpc&utm_campaign=mvp_launch&utm_content=lookalike_1
 ```
 
 ### Google Ads Campaigns:
+
 ```
 Campaign: MVP Roadmap Download
 Ad Group: Startup Keywords
@@ -180,6 +201,7 @@ UTMs: ?utm_source=google&utm_medium=cpc&utm_campaign=mvp_roadmap&utm_content=sea
 ```
 
 ### Email Marketing:
+
 ```
 Newsletter: Weekly Startup Tips
 UTMs: ?utm_source=email&utm_medium=newsletter&utm_campaign=weekly_tips&utm_content=mvp_cta
@@ -187,12 +209,12 @@ UTMs: ?utm_source=email&utm_medium=newsletter&utm_campaign=weekly_tips&utm_conte
 
 ## 📊 Tracking Events Summary
 
-| Event | Trigger | Meta Pixel | Google Analytics | HubSpot |
-|-------|---------|-------------|------------------|---------|
-| Page View | Page load | ✅ PageView | ✅ page_view | ✅ Tracking |
-| Form 1 Submit | Primary form | ✅ Lead | ✅ generate_lead | ✅ Contact + UTMs |
-| Form 2 Submit | Secondary form | ✅ Lead | ✅ generate_lead | ✅ Contact + UTMs |
-| PDF Download | After Form 2 | ✅ Purchase ($0) | ✅ file_download | ✅ Activity |
+| Event         | Trigger        | Meta Pixel       | Google Analytics | HubSpot           |
+| ------------- | -------------- | ---------------- | ---------------- | ----------------- |
+| Page View     | Page load      | ✅ PageView      | ✅ page_view     | ✅ Tracking       |
+| Form 1 Submit | Primary form   | ✅ Lead          | ✅ generate_lead | ✅ Contact + UTMs |
+| Form 2 Submit | Secondary form | ✅ Lead          | ✅ generate_lead | ✅ Contact + UTMs |
+| PDF Download  | After Form 2   | ✅ Purchase ($0) | ✅ file_download | ✅ Activity       |
 
 ## 🚨 Important Notes
 
@@ -217,7 +239,7 @@ UTMs: ?utm_source=email&utm_medium=newsletter&utm_campaign=weekly_tips&utm_conte
 ## 🎉 Success Metrics to Monitor
 
 - **Form 1 Conversion Rate:** Primary lead capture performance
-- **Form 2 Conversion Rate:** Secondary CTA effectiveness  
+- **Form 2 Conversion Rate:** Secondary CTA effectiveness
 - **UTM Attribution:** Campaign source performance
 - **HubSpot Pipeline:** Lead quality and progression
 - **Meta Pixel Events:** Campaign optimization data

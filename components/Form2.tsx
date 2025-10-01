@@ -1,12 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { initializeHubSpot, type LeadData } from '@/lib/hubspot';
-import UTMTracker from '@/lib/utm-tracker';
-import { trackingConfig, trackingEvents, leadSources, hubspotProperties } from '@/lib/enhanced-tracking-config';
-import { Download } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { initializeHubSpot, type LeadData } from "@/lib/hubspot";
+import UTMTracker from "@/lib/utm-tracker";
+import {
+  trackingConfig,
+  trackingEvents,
+  leadSources,
+  hubspotProperties,
+} from "@/lib/enhanced-tracking-config";
+import { Download } from "lucide-react";
 
 interface Form2Props {
   className?: string;
@@ -14,14 +19,14 @@ interface Form2Props {
   showDownloadButton?: boolean;
 }
 
-export default function Form2({ 
-  className = '', 
+export default function Form2({
+  className = "",
   onSubmissionSuccess,
-  showDownloadButton = true 
+  showDownloadButton = true,
 }: Form2Props) {
   const [formData, setFormData] = useState({
-    name: '',
-    email: ''
+    name: "",
+    email: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [useHubSpotEmbed, setUseHubSpotEmbed] = useState(false);
@@ -30,10 +35,12 @@ export default function Form2({
   useEffect(() => {
     // Initialize UTM tracking
     UTMTracker.initialize();
-    
+
     // Try to load HubSpot embed form
-    if (trackingConfig.hubspot.portalId !== 'YOUR_PORTAL_ID' && 
-        trackingConfig.hubspot.form2Id !== 'FORM_2_ID') {
+    if (
+      trackingConfig.hubspot.portalId !== "YOUR_PORTAL_ID" &&
+      trackingConfig.hubspot.form2Id !== "FORM_2_ID"
+    ) {
       loadHubSpotForm();
     }
   }, []);
@@ -46,12 +53,12 @@ export default function Form2({
           trackingConfig.hubspot.form1Id,
           trackingConfig.hubspot.form2Id
         );
-        
-        await hubspot.createForm2('hubspot-form-2');
+
+        await hubspot.createForm2("hubspot-form-2");
         setUseHubSpotEmbed(true);
       }
     } catch (error) {
-      console.warn('Failed to load HubSpot form, using fallback:', error);
+      console.warn("Failed to load HubSpot form, using fallback:", error);
       setUseHubSpotEmbed(false);
     }
   };
@@ -63,15 +70,15 @@ export default function Form2({
     try {
       // Get attribution data
       const attribution = UTMTracker.getAttributionForHubSpot();
-      
+
       // Prepare lead data with hidden fields
       const leadData: LeadData = {
         name: formData.name,
         email: formData.email,
-        form_type: 'Form 2',
+        form_type: "Form 2",
         // Hidden fields as per funnel plan
         lead_source: leadSources.cta_form,
-        ...attribution
+        ...attribution,
       };
 
       // Track form submission events
@@ -83,13 +90,13 @@ export default function Form2({
         trackingConfig.hubspot.form1Id,
         trackingConfig.hubspot.form2Id
       );
-      
+
       const success = await hubspot.submitLead(leadData);
-      
+
       if (success) {
         // Track successful conversion
-        UTMTracker.trackCampaignEvent('form_2_conversion', {
-          email: formData.email
+        UTMTracker.trackCampaignEvent("form_2_conversion", {
+          email: formData.email,
         });
 
         // Trigger PDF download
@@ -98,11 +105,11 @@ export default function Form2({
         // Call success callback
         onSubmissionSuccess?.();
       } else {
-        throw new Error('HubSpot submission failed');
+        throw new Error("HubSpot submission failed");
       }
     } catch (error) {
-      console.error('Form submission error:', error);
-      
+      console.error("Form submission error:", error);
+
       // Even on error, trigger download for better UX
       triggerPDFDownload();
     } finally {
@@ -115,23 +122,23 @@ export default function Form2({
     const gaAttribution = UTMTracker.getAttributionForGA();
 
     // Meta Pixel tracking with lead_source
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', trackingEvents.form2.metaPixel.event, {
+    if (typeof window !== "undefined" && window.fbq) {
+      window.fbq("track", trackingEvents.form2.metaPixel.event, {
         ...trackingEvents.form2.metaPixel.parameters,
         ...attribution,
         // Include UTM parameters as per plan
         utm_source: attribution.utm_source,
         utm_medium: attribution.utm_medium,
         utm_campaign: attribution.utm_campaign,
-        utm_content: attribution.utm_content
+        utm_content: attribution.utm_content,
       });
     }
 
     // Google Analytics tracking
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', trackingEvents.form2.googleAnalytics.event, {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", trackingEvents.form2.googleAnalytics.event, {
         ...trackingEvents.form2.googleAnalytics.parameters,
-        ...gaAttribution
+        ...gaAttribution,
       });
     }
   };
@@ -141,31 +148,31 @@ export default function Form2({
     const attribution = UTMTracker.getAttributionForMetaPixel();
     const gaAttribution = UTMTracker.getAttributionForGA();
 
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'DownloadPDF', {
+    if (typeof window !== "undefined" && window.fbq) {
+      window.fbq("track", "DownloadPDF", {
         lead_source: leadSources.cta_form,
-        content_name: 'MVP Roadmap PDF',
-        content_type: 'product',
+        content_name: "MVP Roadmap PDF",
+        content_type: "product",
         value: 0,
-        currency: 'USD',
-        ...attribution
+        currency: "USD",
+        ...attribution,
       });
     }
 
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'file_download', {
-        event_category: 'PDF',
-        event_label: 'Form 2 PDF Download',
-        file_name: 'mvp-roadmap.pdf',
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "file_download", {
+        event_category: "PDF",
+        event_label: "Form 2 PDF Download",
+        file_name: "mvp-roadmap.pdf",
         lead_source: leadSources.cta_form,
-        ...gaAttribution
+        ...gaAttribution,
       });
     }
 
     // Create and trigger download
-    const link = document.createElement('a');
-    link.href = '/mvp-roadmap.pdf';
-    link.download = 'MVP-Roadmap-4Blocks.pdf';
+    const link = document.createElement("a");
+    link.href = "/mvp-roadmap.pdf";
+    link.download = "MVP-Roadmap-4Blocks.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -190,11 +197,13 @@ export default function Form2({
             type="email"
             placeholder="Email Address"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
             required
             className="focus:outline-none text-base border-[#9ED95D] border"
           />
-          
+
           <Input
             id="name-form2"
             type="text"
@@ -204,7 +213,7 @@ export default function Form2({
             required
             className="focus:outline-none text-base border-[#9ED95D] border md:max-w-[200px]"
           />
-          
+
           {showDownloadButton && (
             <Button
               type="submit"
@@ -212,11 +221,11 @@ export default function Form2({
               className="bg-white text-black hover:bg-gray-100 font-semibold px-4 py-3 text-base whitespace-nowrap"
             >
               <Download className="w-4 h-4 mr-1" />
-              {isSubmitting ? 'SENDING...' : 'DOWNLOAD PDF'}
+              {isSubmitting ? "SENDING..." : "DOWNLOAD PDF"}
             </Button>
           )}
         </div>
-        
+
         {!showDownloadButton && (
           <div className="flex justify-center">
             <Button
@@ -224,12 +233,12 @@ export default function Form2({
               disabled={isSubmitting}
               className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-semibold px-6 py-2 text-base"
             >
-              {isSubmitting ? 'SUBMITTING...' : 'GET ACCESS'}
+              {isSubmitting ? "SUBMITTING..." : "GET ACCESS"}
             </Button>
           </div>
         )}
       </form>
-      
+
       <p className="text-xs text-gray-500 mt-2 text-center">
         Free download • No spam • Unsubscribe anytime
       </p>
