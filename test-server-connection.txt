@@ -1,0 +1,16 @@
+# Manual SSH Test Commands for 185.158.107.133
+
+# 1. Test basic SSH connection
+ssh -i ~/.ssh/id_ed25519_4blocksdevs root@185.158.107.133
+
+# 2. Test whoami command
+ssh -i ~/.ssh/id_ed25519_4blocksdevs root@185.158.107.133 "whoami"
+
+# 3. Test server setup (check if directories exist)
+ssh -i ~/.ssh/id_ed25519_4blocksdevs root@185.158.107.133 "ls -la /var/www/"
+
+# 4. Test if Nginx is installed
+ssh -i ~/.ssh/id_ed25519_4blocksdevs root@185.158.107.133 "which nginx"
+
+# 5. Test server preparation (run the setup script)
+ssh -i ~/.ssh/id_ed25519_4blocksdevs root@185.158.107.133 "curl -s https://raw.githubusercontent.com/4blocksdevs/4blocks/main/scripts/setup-server.sh | bash"
