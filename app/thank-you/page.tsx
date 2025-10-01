@@ -16,6 +16,10 @@ declare global {
   interface Window {
     gtag: any;
     fbq: any;
+    Calendly?: {
+      initPopupWidget: (options: { url: string }) => void;
+      closePopupWidget?: () => void;
+    };
   }
 }
 
@@ -152,7 +156,11 @@ export default function ThankYouPage() {
         window.fbq("track", "Schedule");
       }
 
-      window.open("https://calendly.com/4blocksdevs/30min", "_blank", "noopener,noreferrer");
+      if (window.Calendly && typeof window.Calendly.initPopupWidget === "function") {
+        window.Calendly.initPopupWidget({ url: "https://calendly.com/4blocksdevs/30min" });
+      } else {
+        window.open("https://calendly.com/4blocksdevs/30min", "_blank", "noopener,noreferrer");
+      }
     }
   };
 
@@ -187,6 +195,10 @@ export default function ThankYouPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <link
+        rel="stylesheet"
+        href="https://assets.calendly.com/assets/external/widget.css"
+      />
       <Script
         src="https://assets.calendly.com/assets/external/widget.js"
         strategy="afterInteractive"
@@ -383,12 +395,20 @@ export default function ThankYouPage() {
             &quot;Projects without proper planning fail 80% of the time. Our
             roadmap and consultation reduce that risk dramatically.&quot;
           </p>
-          <Button
-            onClick={handleBookCall}
-            className="bg-[#9ED95D] hover:bg-gray-300 text-black font-semibold px-4 py-4 mb-4 text-base"
+          <a
+            href="#"
+            onClick={e => {
+              e.preventDefault();
+              if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
+                window.Calendly.initPopupWidget({ url: 'https://calendly.com/4blocksdevs/30min' });
+              } else {
+                window.open('https://calendly.com/4blocksdevs/30min', '_blank', 'noopener,noreferrer');
+              }
+            }}
+            className="inline-block bg-[#9ED95D] hover:bg-[#7fc84a] text-black font-semibold px-6 py-3 mb-4 text-base rounded-lg shadow transition-colors"
           >
             BOOK YOUR FREE STRATEGY CALL
-          </Button>
+          </a>
         </div>
 
         {/* Calendly Embed */}
@@ -403,27 +423,40 @@ export default function ThankYouPage() {
                   <Clock className="w-5 h-5 text-[#9ED95D] mr-1" />
                   30 Minute Meeting
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4 items-center">
+                <div className="grid gap-4 items-center ">
                   <div className="text-left space-y-2">
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2">
                       <Clock className="w-4 h-4 text-[#9ED95D]" />
                       <span className="text-black font-semibold text-sm">30 min</span>
-                    </div>
-                    <div className="text-xs text-black/80 leading-relaxed">
+                    </div> */}
+                    <div className="text-xs text-center text-black/80 leading-relaxed">
                       <p>Book a personalized online product vision call with Mirko, our CEO.</p>
                       <p className="mt-1">Available: <span className="font-semibold">9:30–21:30 CET</span></p>
                     </div>
                   </div>
-                  <div className="flex justify-center items-center">
-                    {/* Calendly Inline Widget */}
+                  <div className="flex justify-center items-center w-full">
+                    {/* Calendly Inline Widget - more sizeable and responsive */}
                     <iframe
-                      src="https://calendly.com/4blocksdevs/30min"
-                      width="100%"
-                      height="310"
+                      src="https://calendly.com/4blocksdevs/30min?primary_color=9ED95D"
+                      width="90%"
+                      height="500"
                       frameBorder="0"
                       title="Book a 30 Minute Meeting with 4Blocks"
-                      style={{ minWidth: '160px', borderRadius: '0.5rem', border: '1px solid #9ED95D', boxShadow: '0 2px 16px 0 #b6e89a33' }}
+                      style={{
+                        width: '100%',
+                        minWidth: '320px',
+                        maxWidth: '600px',
+                        minHeight: '700px',
+                        maxHeight: '90vh',
+                        borderRadius: '0.75rem',
+                        border: '1px solid #9ED95D',
+                        boxShadow: '0 4px 24px 0 #b6e89a33',
+                        resize: 'both',
+                        overflow: 'auto',
+                        background: '#fff',
+                      }}
                       allow="camera; microphone; fullscreen; display-capture"
+                      loading="lazy"
                     ></iframe>
                   </div>
                 </div>
