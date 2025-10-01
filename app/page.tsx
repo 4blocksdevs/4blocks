@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -41,8 +42,46 @@ export default function LandingPage() {
     }
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mainForm = document.getElementById('mainForm') as HTMLFormElement | null;
+    const bottomForm = document.getElementById('bottomForm') as HTMLFormElement | null;
+    const pdfButton = document.getElementById('pdfDownloadButton');
+
+    const leadHandler = () => {
+      if (window.fbq) {
+        window.fbq('track', 'Lead');
+      }
+    };
+
+    const downloadHandler = () => {
+      if (window.fbq) {
+        window.fbq('track', 'Download');
+      }
+    };
+
+    const pdfDownloadHandler = () => {
+      if (window.fbq) {
+        window.fbq('track', 'PDFDownload');
+      }
+    };
+
+    mainForm?.addEventListener('submit', leadHandler);
+    bottomForm?.addEventListener('submit', downloadHandler);
+    pdfButton?.addEventListener('click', pdfDownloadHandler);
+
+    return () => {
+      mainForm?.removeEventListener('submit', leadHandler);
+      bottomForm?.removeEventListener('submit', downloadHandler);
+      pdfButton?.removeEventListener('click', pdfDownloadHandler);
+    };
+  }, []);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsSubmitting(true);
 
     try {
@@ -85,7 +124,7 @@ export default function LandingPage() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           email: formData.email,
-          firstname: formData.name,
+          name: formData.name,
         }),
       });
 
@@ -104,7 +143,8 @@ export default function LandingPage() {
     }
   };
 
-  const handleDirectDownload = () => {
+  const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     // Track download event
     if (typeof window !== 'undefined') {
       if (window.gtag) {
@@ -160,7 +200,7 @@ export default function LandingPage() {
             {/* Download Form */}
             <Card className="p-4 mx-2 shadow-lg border bg-white border-[#9ED95D]">
               <CardContent className="p-0">
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form id="mainForm" onSubmit={handleSubmit} className="space-y-4">
                   <div className='mt-4'>
                     {/* <Label htmlFor="name" className="text-gray-700 text-xl">Name</Label> */}
                     <Input
@@ -344,7 +384,7 @@ export default function LandingPage() {
           <div className="bg-[#9ED95D] container mx-auto rounded-md max-w-xl p-6 m-8">
 
             <div className="text-center">
-              <form onSubmit={handleDirectDownload} className="space-y-2">
+              <form id="bottomForm" onSubmit={handleDirectDownload} className="space-y-2">
                 <div className='flex flex-col md:flex-row items-center gap-2'>
                   <Input
                     id="email"
@@ -357,6 +397,7 @@ export default function LandingPage() {
                   />
                   <Button
                     type='submit'
+                    id="pdfDownloadButton"
                     className="bg-white text-black hover:bg-gray-100 font-semibold px-4 py-3 text-base"
                   >
                     <Download className="w-4 h-4 mr-1" />

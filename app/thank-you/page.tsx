@@ -1,22 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Check,
   Download,
-  Mail,
-  Rocket,
-  Users,
   Clock,
-  Target,
-  Wrench,
-  MapPin,
 } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
+import Script from "next/script";
 
 declare global {
   interface Window {
@@ -46,6 +40,60 @@ export default function ThankYouPage() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const checklistButton = document.getElementById("checklistDownloadButton");
+
+    const checklistHandler = () => {
+      if (window.fbq) {
+        window.fbq("track", "ChecklistDownload");
+      }
+    };
+
+    checklistButton?.addEventListener("click", checklistHandler);
+
+    return () => {
+      checklistButton?.removeEventListener("click", checklistHandler);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const calendlyScheduledHandler = (event: MessageEvent) => {
+      const data = event.data;
+
+      if (
+        typeof data === "object" &&
+        data !== null &&
+        "event" in data &&
+        (data as { event?: string }).event === "calendly.event_scheduled"
+      ) {
+        if (window.fbq) {
+          window.fbq("track", "BookedCall");
+        }
+      }
+    };
+
+    window.addEventListener("message", calendlyScheduledHandler);
+
+    return () => {
+      window.removeEventListener("message", calendlyScheduledHandler);
+    };
+  }, []);
+
+  const triggerPdfDownload = () => {
+    const link = document.createElement("a");
+    link.href = "/mvp-roadmap.pdf";
+    link.download = "MVP-Roadmap-4Blocks.pdf";
+    link.click();
+  };
 
   const handleSecondaryDownload = async () => {
     // Track secondary download
@@ -85,10 +133,7 @@ export default function ThankYouPage() {
     } catch (error) {
       console.error("Error sending PDF:", error);
       // Fallback to direct download
-      const link = document.createElement("a");
-      link.href = "/mvp-roadmap.pdf";
-      link.download = "MVP-Roadmap-4Blocks.pdf";
-      link.click();
+      triggerPdfDownload();
     }
   };
 
@@ -109,8 +154,8 @@ export default function ThankYouPage() {
     }
   };
 
-  const handleDirectDownload = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     // Track download event
     if (typeof window !== "undefined") {
       if (window.gtag) {
@@ -130,15 +175,20 @@ export default function ThankYouPage() {
       }
     }
     // Trigger PDF download
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf";
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    link.click();
+    triggerPdfDownload();
     setFormData(initialFormData);
+  };
+
+  const handleChecklistDownload = () => {
+    triggerPdfDownload();
   };
 
   return (
     <div className="min-h-screen bg-white">
+      <Script
+        src="https://assets.calendly.com/assets/external/widget.js"
+        strategy="afterInteractive"
+      />
  
 
       {/* Thank You Section */}
@@ -170,7 +220,12 @@ export default function ThankYouPage() {
             </div>
           </div>
 
-          <Button className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 text-base">
+          <Button
+            id="checklistDownloadButton"
+            type="button"
+            onClick={handleChecklistDownload}
+            className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 text-base"
+          >
             DOWNLOAD MVP ROADMAP
           </Button>
         </div>

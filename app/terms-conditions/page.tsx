@@ -122,7 +122,7 @@ export default function TermsConditions() {
           <section className="mb-4">
             <h2 className="text-lg font-semibold textblack mb-2">12. Updates</h2>
             <p className="text-gray-700 leading-relaxed text-xs">
-              We may update these Terms at any time. Updates will be posted here with a new "Last updated" date. 
+              We may update these Terms at any time. Updates will be posted here with a new &quot;Last updated&quot; date. 
               Your continued use of our services after any changes constitutes acceptance of the new Terms.
             </p>
           </section>

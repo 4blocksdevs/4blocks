@@ -103,7 +103,7 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', 'YOUR_PIXEL_ID'); // Replace with your actual Pixel ID
+              fbq('init', '4277236155853060');
               fbq('track', 'PageView');
             `,
           }}
@@ -148,6 +148,13 @@ export default function RootLayout({
             style={{ display: 'none', visibility: 'hidden' }}
           />
         </noscript>
+        {/* Meta Pixel (noscript) */}
+        <noscript
+          dangerouslySetInnerHTML={{
+            __html:
+              '<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=4277236155853060&ev=PageView&noscript=1" alt="" />',
+          }}
+        />
         <div className="max-w-5xl mx-auto w-full">
         {/* Header */}
         <header className="container mx-auto px-4 py-6">
