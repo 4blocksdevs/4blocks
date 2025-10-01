@@ -25,7 +25,11 @@ declare global {
 
 const initialFormData = { email: "" };
 
-export default function ThankYouPage() {
+interface ThankYouPageProps {
+  type?: 'roadmap' | 'checklist';
+}
+
+export default function ThankYouPage({ type = 'checklist' }: ThankYouPageProps) {
   const [email, setEmail] = useState("");
   const [formData, setFormData] = useState(initialFormData);
 
@@ -211,9 +215,10 @@ export default function ThankYouPage() {
           <h1 className="text-3xl lg:text-5xl font-bold text-black mb-2">
             Thank You!
             <br />
-            Your{" "}
-            <span className="text-[#9ED95D] font-semibold">MVP Roadmap</span> Is
-            on Its Way 🚀
+            Your{' '}
+            <span className="text-[#9ED95D] font-semibold">
+              {type === 'checklist' ? "Founder’s MVP Checklist" : 'MVP Roadmap'}
+            </span>{' '}is on its way 🚀
           </h1>
           <p className="text-black mb-4 text-base">
             Check your inbox,
@@ -249,7 +254,7 @@ export default function ThankYouPage() {
   <section className="container mx-auto px-2 py-8">
         <div className="text-center mb-6">
           <h2 className="text-3xl lg:text-4xl font-bold text-black mb-2">
-            Turn Your <span className="text-[#9ED95D]">MVP</span> Roadmap
+            Turn Your <span className="text-[#9ED95D]">{type === 'checklist' ? "Founder’s MVP Checklist" : 'MVP'}</span> Roadmap
             <br />
             Into Reality With a Free Consultation
           </h2>
