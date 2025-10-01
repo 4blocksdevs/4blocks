@@ -5,10 +5,7 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Download,
-  Clock,
-} from "lucide-react";
+import { Download, Clock } from "lucide-react";
 import Image from "next/image";
 import Script from "next/script";
 import { useSearchParams } from "next/navigation";
@@ -28,8 +25,9 @@ const initialFormData = { email: "" };
 
 export default function ThankYouPage() {
   const searchParams = useSearchParams();
-  const type = searchParams.get('type') === 'checklist' ? 'checklist' : 'roadmap';
-  
+  const type =
+    searchParams.get("type") === "checklist" ? "checklist" : "roadmap";
+
   const [email, setEmail] = useState("");
   const [formData, setFormData] = useState(initialFormData);
 
@@ -160,10 +158,19 @@ export default function ThankYouPage() {
         window.fbq("track", "Schedule");
       }
 
-      if (window.Calendly && typeof window.Calendly.initPopupWidget === "function") {
-        window.Calendly.initPopupWidget({ url: "https://calendly.com/4blocksdevs/30min" });
+      if (
+        window.Calendly &&
+        typeof window.Calendly.initPopupWidget === "function"
+      ) {
+        window.Calendly.initPopupWidget({
+          url: "https://calendly.com/4blocksdevs/30min",
+        });
       } else {
-        window.open("https://calendly.com/4blocksdevs/30min", "_blank", "noopener,noreferrer");
+        window.open(
+          "https://calendly.com/4blocksdevs/30min",
+          "_blank",
+          "noopener,noreferrer"
+        );
       }
     }
   };
@@ -207,18 +214,18 @@ export default function ThankYouPage() {
         src="https://assets.calendly.com/assets/external/widget.js"
         strategy="afterInteractive"
       />
- 
 
       {/* Thank You Section */}
-  <section className="container mx-auto px-2 py-6 text-center">
+      <section className="container mx-auto px-2 py-6 text-center">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl lg:text-5xl font-bold text-black mb-2">
             Thank You!
             <br />
-            Your{' '}
+            Your{" "}
             <span className="text-[#9ED95D] font-semibold">
-              {type === 'checklist' ? "Founder’s MVP Checklist" : 'MVP Roadmap'}
-            </span>{' '}is on its way 🚀
+              {type === "checklist" ? "Founder’s MVP Checklist" : "MVP Roadmap"}
+            </span>{" "}
+            is on its way 🚀
           </h1>
           <p className="text-black mb-4 text-base">
             Check your inbox,
@@ -251,10 +258,14 @@ export default function ThankYouPage() {
       </section>
 
       {/* Consultation CTA */}
-  <section className="container mx-auto px-2 py-8">
+      <section className="container mx-auto px-2 py-8">
         <div className="text-center mb-6">
           <h2 className="text-3xl lg:text-4xl font-bold text-black mb-2">
-            Turn Your <span className="text-[#9ED95D]">{type === 'checklist' ? "Founder’s MVP Checklist" : 'MVP'}</span> Roadmap
+            Turn Your{" "}
+            <span className="text-[#9ED95D]">
+              {type === "checklist" ? "Founder’s MVP Checklist" : "MVP"}
+            </span>{" "}
+            Roadmap
             <br />
             Into Reality With a Free Consultation
           </h2>
@@ -274,7 +285,7 @@ export default function ThankYouPage() {
         </div>
 
         {/* Benefits Grid */}
-  <div className="grid max-w-3xl mx-auto grid-cols-1 gap-3 mb-6">
+        <div className="grid max-w-3xl mx-auto grid-cols-1 gap-3 mb-6">
           <Card className="p-3 shadow-lg border-0 bg-white">
             <CardContent className="p-0">
               <div className="flex items-center py-2 space-x-4">
@@ -350,12 +361,7 @@ export default function ThankYouPage() {
             <CardContent className="p-0">
               <div className="flex items-center py-2 space-x-4">
                 <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 bg-white rounded-lg">
-                  <Image
-                    src="/key.svg"
-                    alt="Key"
-                    width={20}
-                    height={20}
-                  />
+                  <Image src="/key.svg" alt="Key" width={20} height={20} />
                 </div>
                 <div>
                   <h3 className="font-bold text-black text-base mb-1">
@@ -402,12 +408,21 @@ export default function ThankYouPage() {
           </p>
           <a
             href="#"
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
-              if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
-                window.Calendly.initPopupWidget({ url: 'https://calendly.com/4blocksdevs/30min' });
+              if (
+                window.Calendly &&
+                typeof window.Calendly.initPopupWidget === "function"
+              ) {
+                window.Calendly.initPopupWidget({
+                  url: "https://calendly.com/4blocksdevs/30min",
+                });
               } else {
-                window.open('https://calendly.com/4blocksdevs/30min', '_blank', 'noopener,noreferrer');
+                window.open(
+                  "https://calendly.com/4blocksdevs/30min",
+                  "_blank",
+                  "noopener,noreferrer"
+                );
               }
             }}
             className="inline-block bg-[#9ED95D] hover:bg-[#7fc84a] text-black font-semibold px-6 py-3 mb-4 text-base rounded-lg shadow transition-colors"
@@ -420,7 +435,9 @@ export default function ThankYouPage() {
         <div className="max-w-xl mx-auto">
           <Card className="p-0 shadow-xl border-0 bg-gradient-to-br from-[#f8fff0] to-[#e9f7e0] rounded-xl relative overflow-visible">
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
-              <span className="bg-[#9ED95D] text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md border border-[#b6e89a]">FREE CONSULTATION</span>
+              <span className="bg-[#9ED95D] text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md border border-[#b6e89a]">
+                FREE CONSULTATION
+              </span>
             </div>
             <CardContent className="p-0">
               <div className="bg-white/80 rounded-xl p-5 pt-8 text-center border border-[#e5e7eb]">
@@ -435,8 +452,14 @@ export default function ThankYouPage() {
                       <span className="text-black font-semibold text-sm">30 min</span>
                     </div> */}
                     <div className="text-xs text-center text-black/80 leading-relaxed">
-                      <p>Book a personalized online product vision call with Mirko, our CEO.</p>
-                      <p className="mt-1">Available: <span className="font-semibold">9:30–21:30 CET</span></p>
+                      <p>
+                        Book a personalized online product vision call with
+                        Mirko, our CEO.
+                      </p>
+                      <p className="mt-1">
+                        Available:{" "}
+                        <span className="font-semibold">9:30–21:30 CET</span>
+                      </p>
                     </div>
                   </div>
                   <div className="flex justify-center items-center w-full">
@@ -448,17 +471,17 @@ export default function ThankYouPage() {
                       frameBorder="0"
                       title="Book a 30 Minute Meeting with 4Blocks"
                       style={{
-                        width: '100%',
-                        minWidth: '320px',
-                        maxWidth: '600px',
-                        minHeight: '700px',
-                        maxHeight: '90vh',
-                        borderRadius: '0.75rem',
-                        border: '1px solid #9ED95D',
-                        boxShadow: '0 4px 24px 0 #b6e89a33',
-                        resize: 'both',
-                        overflow: 'auto',
-                        background: '#fff',
+                        width: "100%",
+                        minWidth: "320px",
+                        maxWidth: "600px",
+                        minHeight: "700px",
+                        maxHeight: "90vh",
+                        borderRadius: "0.75rem",
+                        border: "1px solid #9ED95D",
+                        boxShadow: "0 4px 24px 0 #b6e89a33",
+                        resize: "both",
+                        overflow: "auto",
+                        background: "#fff",
                       }}
                       allow="camera; microphone; fullscreen; display-capture"
                       loading="lazy"
@@ -472,21 +495,22 @@ export default function ThankYouPage() {
       </section>
       {/* CTA Section */}
       <div className="bg-[#9ED95D] container mx-auto rounded-md max-w-xl p-6 m-8">
-
         <div className="text-center">
           <form onSubmit={handleDirectDownload} className="space-y-2">
-            <div className='flex flex-col md:flex-row items-center gap-2'>
+            <div className="flex flex-col md:flex-row items-center gap-2">
               <Input
                 id="email"
                 type="email"
                 placeholder="Email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 required
                 className="focus:outline-none text-base border-[#9ED95D] border"
               />
               <Button
-                type='submit'
+                type="submit"
                 className="bg-white text-black hover:bg-gray-100 font-semibold px-4 py-3 text-base"
               >
                 <Download className="w-4 h-4 mr-1" />
@@ -496,7 +520,6 @@ export default function ThankYouPage() {
           </form>
         </div>
       </div>
-      
     </div>
   );
 }
