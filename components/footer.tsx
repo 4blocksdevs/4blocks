@@ -27,7 +27,7 @@ const Footer = () => {
             <p className="text-black text-xs">info@4blocks.xyz</p>
             <div className="flex items-center mt-1">
               <Image
-                src="/Whatsapp.svg"
+                src="/WhatsApp.svg"
                 alt="WhatsApp"
                 width={20}
                 height={20}

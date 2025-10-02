@@ -38,8 +38,9 @@ export default function Form2({
 
     // Try to load HubSpot embed form
     if (
-      trackingConfig.hubspot.portalId !== "YOUR_PORTAL_ID" &&
-      trackingConfig.hubspot.form2Id !== "FORM_2_ID"
+      trackingConfig.hubspot.portalId !== "146982667" &&
+      trackingConfig.hubspot.form2Id !== "3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3" &&
+      hubspotContainerRef.current
     ) {
       loadHubSpotForm();
     }

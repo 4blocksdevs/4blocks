@@ -4,11 +4,13 @@ import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, CheckCircle } from "lucide-react";
-import Image from "next/image";
 import UTMTracker from "@/lib/utm-tracker";
 import { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
+import { useRouter } from "next/navigation";
 
 export default function ChecklistPage() {
+  const router = useRouter();
+
   useEffect(() => {
     // Initialize UTM tracking for checklist page
     UTMTracker.initialize();
@@ -75,6 +77,9 @@ export default function ChecklistPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // Optionally, redirect to a thank you page
+    router.push('/thank-you?type=checklist');
   };
 
   const updateHubSpotProperty = async (property: string, value: string) => {
@@ -85,27 +90,7 @@ export default function ChecklistPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="container mx-auto px-4 py-6">
-        <a
-          href="/"
-          className="block w-fit"
-          tabIndex={0}
-          aria-label="Go to homepage"
-        >
-          <div className="flex items-center cursor-pointer">
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center">
-              <Image
-                src="/logo.svg"
-                alt="4Blocks Logo"
-                width={42}
-                height={48}
-              />
-            </div>
-            <span className="ml-2 text-2xl font-bold text-black">BLOCKS</span>
-          </div>
-        </a>
-      </header>
+    
 
       {/* Main Content */}
       <section className="container max-w-4xl mx-auto px-4 py-8">

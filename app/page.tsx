@@ -146,12 +146,12 @@ export default function LandingPage() {
 
       if (response.ok) {
         // Redirect to thank you page
-        router.push("/thank-you");
+        router.push("/thank-you?type=roadmap");
       } else {
         throw new Error("Form submission failed");
       }
     } catch (error) {
-      router.push("/thank-you");
+      router.push("/thank-you?type=roadmap");
       console.error("Error submitting form:", error);
       alert(
         "There was an error submitting your information. Please try again."
