@@ -108,7 +108,7 @@ export default function CookieBanner() {
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <Info className="w-4 h-4 text-[#9ED95D]" />
-                  <h3 className="text-base font-semibold text-black">We value your privacy</h3>
+                  <h3 className="text-base font-semibold text-black">We value your <span className="text-[#9ED95D]">privacy</span></h3>
                 </div>
                 <Button
                   variant="ghost"
