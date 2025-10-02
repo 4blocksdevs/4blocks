@@ -225,7 +225,7 @@ export default function Form1({
             />
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             <Button
               type="submit"
               disabled={isSubmitting}
