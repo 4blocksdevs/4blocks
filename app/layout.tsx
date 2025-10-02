@@ -10,9 +10,9 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://4blocks.xyz"),
-  title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+  title: "Free 4blocks MVP Roadmap Guide | Plan & Save on Development",
   description:
-    "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money. Created by 4Blocks Italian software experts.",
+    "Download our free MVP Roadmap and learn how to validate ideas, plan smarter, and cut development costs. Build your product with clarity and confidence.",
   keywords:
     "MVP roadmap, startup guide, product development, software development, 4Blocks, Italian software solutions, minimum viable product, startup strategy",
   authors: [{ name: "4Blocks", url: "https://4blocks.xyz" }],
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     canonical: "https://4blocks.xyz",
   },
   openGraph: {
-    title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+    title: "Free 4blocks MVP Roadmap Guide | Plan & Save on Development",
     description:
-      "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.",
+      "Download our free MVP Roadmap and learn how to validate ideas, plan smarter, and cut development costs. Build your product with clarity and confidence.",
     url: "https://4blocks.xyz",
     siteName: "4Blocks",
     images: [
@@ -41,9 +41,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+    title: "Free 4blocks MVP Roadmap Guide | Plan & Save on Development",
     description:
-      "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.",
+      "Download our free MVP Roadmap and learn how to validate ideas, plan smarter, and cut development costs. Build your product with clarity and confidence.",
     creator: "@4blocks",
     images: ["/og-image.jpg"],
   },
