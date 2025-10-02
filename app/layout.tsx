@@ -57,10 +57,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <html lang="en">
       <head>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         {/* Google Tag Manager */}
         <Script
           id="gtm-script"
@@ -70,13 +71,13 @@ export default function RootLayout({
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-XXXXXX');`, // Replace GTM-XXXXXX with your GTM ID
+            })(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GTM_ID}');`,
           }}
         />
 
         {/* Google Analytics 4 */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"
         />
         <Script
@@ -87,11 +88,11 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'GA_MEASUREMENT_ID', {
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
                 anonymize_ip: true,
                 cookie_expires: 63072000
               });
-            `, // Replace GA_MEASUREMENT_ID with your actual GA4 ID
+            `,
           }}
         />
 
@@ -109,7 +110,7 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '4277236155853060');
+              fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
               fbq('track', 'PageView');
             `,
           }}

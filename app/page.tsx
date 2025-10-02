@@ -133,7 +133,7 @@ export default function LandingPage() {
       // });
 
       const response = await fetch(
-        "https://forms.hubspot.com/uploads/form/v2/146982667/3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3",
+        `https://forms.hubspot.com/uploads/form/v2/${process.env.HUBSPOT_PORTAL_ID}/${process.env.HUBSPOT_FORM_ID}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
