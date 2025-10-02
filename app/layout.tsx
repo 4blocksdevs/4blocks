@@ -76,7 +76,7 @@ export default function RootLayout({
 
         {/* Google Analytics 4 */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
+          src="https://www.googletagmanager.com/gtag/js?id=G-CC9W51TKC8"
           strategy="afterInteractive"
         />
         <Script
@@ -87,11 +87,8 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'GA_MEASUREMENT_ID', {
-                anonymize_ip: true,
-                cookie_expires: 63072000
-              });
-            `, // Replace GA_MEASUREMENT_ID with your actual GA4 ID
+              gtag('config', 'G-CC9W51TKC8');
+            `,
           }}
         />
 

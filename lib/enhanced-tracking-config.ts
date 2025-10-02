@@ -11,7 +11,7 @@ export const trackingConfig = {
     pixelId: "4277236155853060", // Replace with your Meta Pixel ID
   },
   googleAnalytics: {
-    measurementId: "GA_MEASUREMENT_ID", // Replace with your GA4 Measurement ID
+    measurementId: "G-CC9W51TKC8", // Google Analytics 4 Measurement ID
   },
   googleTagManager: {
     gtmId: "GTM-XXXXXX", // Replace with your GTM Container ID

@@ -35,7 +35,7 @@ export default function LandingPage() {
     if (typeof window !== "undefined") {
       // Google Analytics
       if (window.gtag) {
-        window.gtag("config", "GA_MEASUREMENT_ID", {
+        window.gtag("config", "G-CC9W51TKC8", {
           page_title: "MVP Roadmap Landing Page",
           page_location: window.location.href,
           ...UTMTracker.getAttributionForGA(),
