@@ -60,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         {/* Google Tag Manager */}
         <Script
           id="gtm-script"
