@@ -1,9 +1,9 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { X, Cookie, Settings, Info } from 'lucide-react';
-import Link from 'next/link';
+"use client";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { X, Cookie, Settings, Info } from "lucide-react";
+import Link from "next/link";
 
 interface CookiePreferences {
   essential: boolean;
@@ -17,12 +17,12 @@ export default function CookieBanner() {
   const [preferences, setPreferences] = useState<CookiePreferences>({
     essential: true,
     analytics: false,
-    marketing: false
+    marketing: false,
   });
 
   useEffect(() => {
     // Check if user has already made a choice
-    const cookieConsent = localStorage.getItem('cookie-consent');
+    const cookieConsent = localStorage.getItem("cookie-consent");
     if (!cookieConsent) {
       setShowBanner(true);
     } else {
@@ -33,14 +33,16 @@ export default function CookieBanner() {
   }, []);
 
   const initializeTracking = (prefs: CookiePreferences) => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Initialize Google Analytics if analytics cookies accepted
       if (prefs.analytics) {
-        window.gtag = window.gtag || function() {
-          (window.dataLayer = window.dataLayer || []).push(arguments);
-        };
-        window.gtag('js', new Date());
-        window.gtag('config', 'GA_MEASUREMENT_ID', {
+        window.gtag =
+          window.gtag ||
+          function () {
+            (window.dataLayer = window.dataLayer || []).push(arguments);
+          };
+        window.gtag("js", new Date());
+        window.gtag("config", "GA_MEASUREMENT_ID", {
           anonymize_ip: true,
           cookie_expires: 63072000, // 2 years
         });
@@ -48,18 +50,32 @@ export default function CookieBanner() {
 
       // Initialize Meta Pixel if marketing cookies accepted
       if (prefs.marketing) {
-        (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-          if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)
-        })(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-        
-        window.fbq('init', 'YOUR_PIXEL_ID');
-        window.fbq('track', 'PageView');
+        (function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
+          if (f.fbq) return;
+          n = f.fbq = function () {
+            n.callMethod
+              ? n.callMethod.apply(n, arguments)
+              : n.queue.push(arguments);
+          };
+          if (!f._fbq) f._fbq = n;
+          n.push = n;
+          n.loaded = !0;
+          n.version = "2.0";
+          n.queue = [];
+          t = b.createElement(e);
+          t.async = !0;
+          t.src = v;
+          s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s);
+        })(
+          window,
+          document,
+          "script",
+          "https://connect.facebook.net/en_US/fbevents.js"
+        );
+
+        window.fbq("init", "YOUR_PIXEL_ID");
+        window.fbq("track", "PageView");
       }
     }
   };
@@ -68,17 +84,17 @@ export default function CookieBanner() {
     const allAccepted = {
       essential: true,
       analytics: true,
-      marketing: true
+      marketing: true,
     };
     setPreferences(allAccepted);
-    localStorage.setItem('cookie-consent', JSON.stringify(allAccepted));
+    localStorage.setItem("cookie-consent", JSON.stringify(allAccepted));
     initializeTracking(allAccepted);
     setShowBanner(false);
     setShowSettings(false);
   };
 
   const handleAcceptSelected = () => {
-    localStorage.setItem('cookie-consent', JSON.stringify(preferences));
+    localStorage.setItem("cookie-consent", JSON.stringify(preferences));
     initializeTracking(preferences);
     setShowBanner(false);
     setShowSettings(false);
@@ -88,10 +104,10 @@ export default function CookieBanner() {
     const essentialOnly = {
       essential: true,
       analytics: false,
-      marketing: false
+      marketing: false,
     };
     setPreferences(essentialOnly);
-    localStorage.setItem('cookie-consent', JSON.stringify(essentialOnly));
+    localStorage.setItem("cookie-consent", JSON.stringify(essentialOnly));
     setShowBanner(false);
     setShowSettings(false);
   };
@@ -108,7 +124,10 @@ export default function CookieBanner() {
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <Info className="w-4 h-4 text-[#9ED95D]" />
-                  <h3 className="text-base font-semibold text-black">We value your <span className="text-[#9ED95D]">privacy</span></h3>
+                  <h3 className="text-base font-semibold text-black">
+                    We value your{" "}
+                    <span className="text-[#9ED95D]">privacy</span>
+                  </h3>
                 </div>
                 <Button
                   variant="ghost"
@@ -120,19 +139,28 @@ export default function CookieBanner() {
                 </Button>
               </div>
               <p className="text-black mb-2 text-xs">
-                We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. <br />
-                By clicking &quot;Accept All,&quot; you consent to our use of cookies. You can also choose &quot;Reject All&quot; or &quot;Customize Settings&quot; to control your preferences.
+                We use cookies to enhance your browsing experience, serve
+                personalized ads or content, and analyze our traffic. <br />
+                By clicking &quot;Accept All,&quot; you consent to our use of
+                cookies. You can also choose &quot;Reject All&quot; or
+                &quot;Customize Settings&quot; to control your preferences.
               </p>
               <div className="text-xs text-black mb-3">
-                Read our{' '}
-                <Link href="/privacy-policy" className="text-[#9ED95D] hover:underline">
+                Read our{" "}
+                <Link
+                  href="/privacy-policy"
+                  className="text-[#9ED95D] hover:underline"
+                >
                   Privacy Policy
-                </Link>
-                {' '}and{' '}
-                <Link href="/cookies-policy" className="text-[#9ED95D] hover:underline">
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/cookies-policy"
+                  className="text-[#9ED95D] hover:underline"
+                >
                   Cookies Policy
-                </Link>
-                {' '}for more information.
+                </Link>{" "}
+                for more information.
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -162,7 +190,9 @@ export default function CookieBanner() {
             // Settings panel
             <div>
               <div className="flex items-start justify-between mb-3">
-                <h3 className="text-sm font-semibold text-black">Customize Settings</h3>
+                <h3 className="text-sm font-semibold text-black">
+                  Customize Settings
+                </h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -172,14 +202,20 @@ export default function CookieBanner() {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg">
                   <div>
-                    <h4 className="font-medium text-black text-xs">Necessary Cookies</h4>
+                    <h4 className="font-medium text-black text-xs">
+                      Necessary Cookies
+                    </h4>
                     <p className="text-[10px] text-black">
-                      These cookies are essential for the website to function and cannot be switched off in our systems. They are usually only set in response to actions you take, such as setting your privacy preferences, logging in, or filling out forms. Without these cookies, parts of our site will not work properly.
+                      These cookies are essential for the website to function
+                      and cannot be switched off in our systems. They are
+                      usually only set in response to actions you take, such as
+                      setting your privacy preferences, logging in, or filling
+                      out forms. Without these cookies, parts of our site will
+                      not work properly.
                     </p>
-                     
                   </div>
                   <div className="grid place-items-center grid-cols-2">
                     <input
@@ -188,52 +224,76 @@ export default function CookieBanner() {
                       disabled
                       className="w-3 h-3 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D]"
                     />
-                    <span className="inline-block text-[10px] text-[#9ED95D] p-1 font-semibold mt-0.5">Always Active</span>
+                    <span className="inline-block text-[10px] text-[#9ED95D] p-1 font-semibold mt-0.5">
+                      Always Active
+                    </span>
                   </div>
                 </div>
-                  <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg">
+                <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg">
                   <div>
-                    <h4 className="font-medium text-black text-xs">Analytics Cookies</h4>
+                    <h4 className="font-medium text-black text-xs">
+                      Analytics Cookies
+                    </h4>
                     <p className="text-[10px] text-black">
-                      These cookies help us understand how visitors interact with our website. We use them to count visits, measure traffic sources, and improve our performance. They show us which pages are most and least popular and how visitors move around the site.
+                      These cookies help us understand how visitors interact
+                      with our website. We use them to count visits, measure
+                      traffic sources, and improve our performance. They show us
+                      which pages are most and least popular and how visitors
+                      move around the site.
                     </p>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       checked={preferences.analytics}
-                      onChange={(e) => setPreferences({
-                        ...preferences,
-                        analytics: e.target.checked
-                      })}
+                      onChange={(e) =>
+                        setPreferences({
+                          ...preferences,
+                          analytics: e.target.checked,
+                        })
+                      }
                       className="w-3 h-3 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-2"
                     />
                   </div>
                 </div>
-                  <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg ">
+                <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg ">
                   <div>
-                    <h4 className="font-medium text-black text-xs">Marketing Cookies</h4>
+                    <h4 className="font-medium text-black text-xs">
+                      Marketing Cookies
+                    </h4>
                     <p className="text-[10px] text-black">
-                      These cookies may be set by our advertising and marketing partners, such as Meta (Facebook) and HubSpot. They may be used to build a profile of your interests, deliver relevant advertising on other websites, and measure the effectiveness of campaigns.
+                      These cookies may be set by our advertising and marketing
+                      partners, such as Meta (Facebook) and HubSpot. They may be
+                      used to build a profile of your interests, deliver
+                      relevant advertising on other websites, and measure the
+                      effectiveness of campaigns.
                     </p>
                   </div>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       checked={preferences.marketing}
-                      onChange={(e) => setPreferences({
-                        ...preferences,
-                        marketing: e.target.checked
-                      })}
+                      onChange={(e) =>
+                        setPreferences({
+                          ...preferences,
+                          marketing: e.target.checked,
+                        })
+                      }
                       className="w-3 h-3 text-[#9ED95D] border-gray-300 rounded focus:ring-[#9ED95D] mx-2"
                     />
                   </div>
                 </div>
-                  <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg ">
+                <div className="flex items-center justify-between p-2 bg-[#F0FFDF] rounded-lg ">
                   <div>
-                    <h4 className="font-medium text-black text-xs">Functional Cookies</h4>
+                    <h4 className="font-medium text-black text-xs">
+                      Functional Cookies
+                    </h4>
                     <p className="text-[10px] text-black">
-                      These cookies enable enhanced functionality and personalization, such as remembering your preferences or integrating with third-party services. If you do not allow these cookies, some or all of these services may not function properly.
+                      These cookies enable enhanced functionality and
+                      personalization, such as remembering your preferences or
+                      integrating with third-party services. If you do not allow
+                      these cookies, some or all of these services may not
+                      function properly.
                     </p>
                   </div>
                   <div className="flex mx-2 items-center">

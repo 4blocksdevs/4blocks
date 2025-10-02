@@ -229,7 +229,7 @@ export default function Form1({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="mt-2 bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-semibold py-2 px-4 text-base"
+              className="mt-2 bg-[#9ED95D] hover:bg-[#8BC34A] text-black font-semibold py-2 px-4 text-base transition-all duration-200 hover:shadow-lg hover:scale-105"
             >
               {isSubmitting ? "PROCESSING..." : "GET INSTANT ACCESS"}
             </Button>

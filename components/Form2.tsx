@@ -218,7 +218,7 @@ export default function Form2({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-white text-black hover:bg-gray-100 font-semibold px-4 py-3 text-base whitespace-nowrap"
+              className="bg-white text-black hover:bg-gray-50 font-semibold px-4 py-3 text-base whitespace-nowrap transition-all duration-200 hover:shadow-lg hover:scale-105 border border-gray-200 hover:border-[#9ED95D]"
             >
               <Download className="w-4 h-4 mr-1" />
               {isSubmitting ? "SENDING..." : "DOWNLOAD PDF"}
