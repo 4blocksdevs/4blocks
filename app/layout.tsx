@@ -10,9 +10,9 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://4blocks.xyz"),
-  title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+  title: "Free 4blocks MVP Roadmap Guide | Plan & Save on Development",
   description:
-    "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money. Created by 4Blocks Italian software experts.",
+    "Download our free MVP Roadmap and learn how to validate ideas, plan smarter, and cut development costs. Build your product with clarity and confidence.",
   keywords:
     "MVP roadmap, startup guide, product development, software development, 4Blocks, Italian software solutions, minimum viable product, startup strategy",
   authors: [{ name: "4Blocks", url: "https://4blocks.xyz" }],
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     canonical: "https://4blocks.xyz",
   },
   openGraph: {
-    title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+    title: "Free 4blocks MVP Roadmap Guide | Plan & Save on Development",
     description:
-      "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.",
+      "Download our free MVP Roadmap and learn how to validate ideas, plan smarter, and cut development costs. Build your product with clarity and confidence.",
     url: "https://4blocks.xyz",
     siteName: "4Blocks",
     images: [
@@ -41,9 +41,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free MVP Roadmap PDF - 7 Steps to Launch Successfully | 4Blocks",
+    title: "Free 4blocks MVP Roadmap Guide | Plan & Save on Development",
     description:
-      "Download your free MVP roadmap PDF. Learn the proven 7-step guide to launch a successful MVP without wasting time and money.",
+      "Download our free MVP Roadmap and learn how to validate ideas, plan smarter, and cut development costs. Build your product with clarity and confidence.",
     creator: "@4blocks",
     images: ["/og-image.jpg"],
   },
@@ -57,10 +57,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <html lang="en">
       <head>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         {/* Google Tag Manager */}
         <Script
           id="gtm-script"
@@ -70,13 +71,13 @@ export default function RootLayout({
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-XXXXXX');`, // Replace GTM-XXXXXX with your GTM ID
+            })(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GTM_ID}');`,
           }}
         />
 
         {/* Google Analytics 4 */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-CC9W51TKC8"
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"
         />
         <Script
@@ -87,7 +88,10 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-CC9W51TKC8');
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                anonymize_ip: true,
+                cookie_expires: 63072000
+              });
             `,
           }}
         />
@@ -106,7 +110,7 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '4277236155853060');
+              fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
               fbq('track', 'PageView');
             `,
           }}
