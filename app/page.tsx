@@ -12,6 +12,7 @@ import CookieBanner from "@/components/CookieBanner";
 import Form1 from "@/components/Form1";
 import Form2 from "@/components/Form2";
 import UTMTracker from "@/lib/utm-tracker";
+import UniversalTracking from "@/lib/universal-tracking";
 import { trackingEvents } from "@/lib/tracking-config";
 
 declare global {
@@ -73,15 +74,21 @@ export default function LandingPage() {
     };
 
     const downloadHandler = () => {
-      if (window.fbq) {
-        window.fbq("track", "Download");
-      }
+      // Track download with Universal Tracking
+      UniversalTracking.trackPDFDownload(
+        "MVP-Roadmap-4Blocks.pdf",
+        "main_page_bottom_form",
+        "mvp_roadmap"
+      );
     };
 
     const pdfDownloadHandler = () => {
-      if (window.fbq) {
-        window.fbq("track", "PDFDownload");
-      }
+      // Track PDF download with Universal Tracking
+      UniversalTracking.trackPDFDownload(
+        "MVP-Roadmap-4Blocks.pdf",
+        "main_page_pdf_button",
+        "mvp_roadmap"
+      );
     };
 
     mainForm?.addEventListener("submit", leadHandler);
@@ -163,25 +170,13 @@ export default function LandingPage() {
 
   const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Track download event
-    if (typeof window !== "undefined") {
-      if (window.gtag) {
-        window.gtag("event", "Download", {
-          event_category: "engagement",
-          event_label: "Direct MVP Roadmap Download",
-          value: 1,
-        });
-      }
 
-      if (window.fbq) {
-        window.fbq("track", "Purchase", {
-          content_name: "MVP Roadmap PDF",
-          content_type: "product",
-          value: 0,
-          currency: "USD",
-        });
-      }
-    }
+    // Track download event with Universal Tracking
+    UniversalTracking.trackPDFDownload(
+      "MVP-Roadmap-4Blocks.pdf",
+      "main_page_direct_download",
+      "mvp_roadmap"
+    );
 
     // Trigger PDF download
     const link = document.createElement("a");

@@ -1,6 +1,7 @@
-"use client"
-import Image from 'next/image';
-import React from 'react'
+"use client";
+import Image from "next/image";
+import React from "react";
+import UniversalTracking from "@/lib/universal-tracking";
 
 const Footer = () => {
   return (
@@ -17,14 +18,26 @@ const Footer = () => {
                   height={24}
                 />
               </div>
-              <span className="ml-1 text-black text-base font-bold">BLOCKS</span>
+              <span className="ml-1 text-black text-base font-bold">
+                BLOCKS
+              </span>
             </div>
-            <p className="text-black text-xs">Italian Software Solutions for Businesses</p>
+            <p className="text-black text-xs">
+              Italian Software Solutions for Businesses
+            </p>
           </div>
 
           <div>
             <h3 className="text-sm text-black font-semibold mb-2">CONTACTS</h3>
-            <p className="text-black text-xs">info@4blocks.xyz</p>
+            <a
+              href="mailto:info@4blocks.xyz"
+              onClick={() =>
+                UniversalTracking.trackContactClick("email", "footer")
+              }
+              className="text-black text-xs hover:underline"
+            >
+              info@4blocks.xyz
+            </a>
             <div className="flex items-center mt-1">
               <Image
                 src="/WhatsApp.svg"
@@ -37,29 +50,50 @@ const Footer = () => {
                 href="https://wa.me/393883786104"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  UniversalTracking.trackContactClick(
+                    "phone",
+                    "footer_whatsapp"
+                  )
+                }
                 className="text-black text-xs hover:underline ml-1"
               >
                 +39 388 378 6104
               </a>
             </div>
-            
           </div>
 
           <div>
             <h3 className="text-sm text-black font-semibold mb-2">POLICIES</h3>
             <div className="flex gap-1">
-              <a href="/privacy-policy" className="block text-black hover:text-gray-700 transition-colors text-xs">Privacy Policy</a>
-              <a href="/terms-conditions" className="block text-black hover:text-gray-700 transition-colors text-xs">| Terms & Conditions</a>
-              <a href="/cookies-policy" className="block text-black hover:text-gray-700 transition-colors text-xs">| Cookies</a>
+              <a
+                href="/privacy-policy"
+                className="block text-black hover:text-gray-700 transition-colors text-xs"
+              >
+                Privacy Policy
+              </a>
+              <a
+                href="/terms-conditions"
+                className="block text-black hover:text-gray-700 transition-colors text-xs"
+              >
+                | Terms & Conditions
+              </a>
+              <a
+                href="/cookies-policy"
+                className="block text-black hover:text-gray-700 transition-colors text-xs"
+              >
+                | Cookies
+              </a>
             </div>
           </div>
         </div>
         <div className="mt-24 text-center text-black text-xs mb-4">
-          &copy; {new Date().getFullYear()} 4BLOCKS Software Development LLC. All rights reserved. Made in Italy.
+          &copy; {new Date().getFullYear()} 4BLOCKS Software Development LLC.
+          All rights reserved. Made in Italy.
         </div>
       </div>
     </footer>
-  )
-}
+  );
+};
 
 export default Footer;
