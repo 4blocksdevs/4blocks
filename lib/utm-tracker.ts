@@ -12,7 +12,7 @@ export interface UTMParameters {
   fbclid?: string; // Facebook click ID
   // Facebook Ad specific tracking parameters
   ad_id?: string; // Individual ad ID
-  adset_id?: string; // Ad set ID  
+  adset_id?: string; // Ad set ID
   campaign_id?: string; // Campaign ID
 }
 
@@ -40,7 +40,7 @@ class UTMTracker {
     "fbclid",
     // Facebook Ad specific parameters for campaign optimization
     "ad_id",
-    "adset_id", 
+    "adset_id",
     "campaign_id",
   ];
 

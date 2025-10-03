@@ -105,7 +105,7 @@ class UniversalTracking {
       enriched.referrer = attribution.referrer;
       enriched.landing_page = attribution.landing_page;
       enriched.session_id = attribution.session_id;
-      
+
       // Facebook Ad specific parameters
       enriched.ad_id = attribution.ad_id;
       enriched.adset_id = attribution.adset_id;
@@ -189,7 +189,7 @@ class UniversalTracking {
     if (eventData.utm_campaign) params.utm_campaign = eventData.utm_campaign;
     if (eventData.utm_content) params.utm_content = eventData.utm_content;
     if (eventData.fbclid) params.fbclid = eventData.fbclid;
-    
+
     // Facebook Ad specific parameters for campaign optimization
     if (eventData.ad_id) params.ad_id = eventData.ad_id;
     if (eventData.adset_id) params.adset_id = eventData.adset_id;
