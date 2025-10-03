@@ -37,7 +37,7 @@ class UniversalTracking {
   static setDebugMode(enabled: boolean): void {
     this.debugMode = enabled;
     if (enabled) {
-      console.log('🔍 Universal Tracking Debug Mode ENABLED');
+      console.log("🔍 Universal Tracking Debug Mode ENABLED");
     }
   }
 
@@ -65,9 +65,9 @@ class UniversalTracking {
 
     if (this.debugMode) {
       console.group(`🎯 TRACKING EVENT: ${eventData.event_type}`);
-      console.log('📝 Original Event Data:', eventData);
-      console.log('🏷️ Attribution Data:', attribution);
-      console.log('✨ Enriched Event Data:', enrichedData);
+      console.log("📝 Original Event Data:", eventData);
+      console.log("🏷️ Attribution Data:", attribution);
+      console.log("✨ Enriched Event Data:", enrichedData);
     }
 
     // Fire events to all platforms
@@ -76,7 +76,7 @@ class UniversalTracking {
     this.trackGoogleAnalyticsEvent(enrichedData);
 
     if (this.debugMode) {
-      console.log('✅ Event sent to all platforms');
+      console.log("✅ Event sent to all platforms");
       console.groupEnd();
     } else {
       console.log(`🎯 Event tracked: ${eventData.event_type} →`, enrichedData);
@@ -121,7 +121,7 @@ class UniversalTracking {
   private static trackMetaPixelEvent(eventData: EventData): void {
     if (!window.fbq) {
       if (this.debugMode) {
-        console.warn('⚠️ Meta Pixel (fbq) not found - event not sent to Meta');
+        console.warn("⚠️ Meta Pixel (fbq) not found - event not sent to Meta");
       }
       return;
     }
@@ -185,16 +185,27 @@ class UniversalTracking {
     if (eventData.utm_content) params.utm_content = eventData.utm_content;
     if (eventData.fbclid) params.fbclid = eventData.fbclid;
 
+    if (this.debugMode) {
+      console.log(`📱 META PIXEL EVENT: ${metaEvent}`, params);
+    }
+
     // Fire Meta Pixel event
     window.fbq("track", metaEvent, params);
 
     // Also fire custom event for detailed tracking
-    window.fbq("trackCustom", `Custom_${event_type}`, {
+    const customEventName = `Custom_${event_type}`;
+    const customParams = {
       ...params,
       custom_event_type: event_type,
       page_url: eventData.page_url,
       timestamp: eventData.timestamp,
-    });
+    };
+
+    window.fbq("trackCustom", customEventName, customParams);
+
+    if (this.debugMode) {
+      console.log(`📱 META CUSTOM EVENT: ${customEventName}`, customParams);
+    }
   }
 
   /**
@@ -452,6 +463,37 @@ class UniversalTracking {
     console.log("- Google Analytics:", !!window.gtag);
     console.log("- HubSpot:", !!window.hbspt);
     console.groupEnd();
+  }
+
+  /**
+   * Test all tracking events (for development/testing)
+   */
+  static testAllEvents(): void {
+    if (!this.debugMode) {
+      console.warn('⚠️ Enable debug mode first: UniversalTracking.setDebugMode(true)');
+      return;
+    }
+
+    console.group('🧪 TESTING ALL TRACKING EVENTS');
+    
+    console.log('🧪 Testing Form Submission...');
+    this.trackFormSubmission('Test Form', 'test_source', { email: 'test@example.com' });
+    
+    console.log('🧪 Testing PDF Download...');
+    this.trackPDFDownload('test-file.pdf', 'test_download', 'mvp_roadmap');
+    
+    console.log('🧪 Testing Book Call Click...');
+    this.trackBookCallClick('test_button');
+    
+    console.log('🧪 Testing Calendar Booking...');
+    this.trackCalendarBooking('test_calendar', { test: true });
+    
+    console.log('🧪 Testing Contact Clicks...');
+    this.trackContactClick('email', 'test_location');
+    this.trackContactClick('phone', 'test_location');
+    
+    console.groupEnd();
+    console.log('✅ Test complete! Check Events Manager in Facebook to see if events appeared.');
   }
 }
 
