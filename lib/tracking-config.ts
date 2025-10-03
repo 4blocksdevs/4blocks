@@ -61,12 +61,11 @@ export const trackingEvents = {
   },
   pdfDownload: {
     metaPixel: {
-      event: "Purchase",
+      event: "DownloadPDF",
       parameters: {
         content_name: "MVP Roadmap PDF",
         content_type: "product",
-        value: 0,
-        currency: "USD",
+        pdf_type: "roadmap",
       },
     },
     googleAnalytics: {
