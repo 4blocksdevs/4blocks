@@ -8,7 +8,7 @@ export const trackingConfig = {
     form2Id: "FORM_2_ID", // Replace with your Form 2 ID
   },
   metaPixel: {
-    pixelId: "4277236155853060", // Replace with your Meta Pixel ID
+    pixelId: "4177892689146666", // Replace with your Meta Pixel ID
   },
   googleAnalytics: {
     measurementId: "G-CC9W51TKC8", // Google Analytics 4 Measurement ID
