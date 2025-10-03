@@ -129,20 +129,6 @@ export default function PrivacyPolicy() {
                 <strong>Email:</strong>{" "}
                 <a
                   href="mailto:info@4blocks.xyz"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      // Simple tracking for privacy policy page
-                      if (window.gtag) {
-                        window.gtag("event", "click", {
-                          event_category: "Contact",
-                          event_label: "Email Click - Privacy Policy",
-                        });
-                      }
-                      if (window.fbq) {
-                        window.fbq("track", "Contact");
-                      }
-                    }
-                  }}
                   className="text-green-700 underline"
                 >
                   info@4blocks.xyz
