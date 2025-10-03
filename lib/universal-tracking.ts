@@ -470,30 +470,36 @@ class UniversalTracking {
    */
   static testAllEvents(): void {
     if (!this.debugMode) {
-      console.warn('⚠️ Enable debug mode first: UniversalTracking.setDebugMode(true)');
+      console.warn(
+        "⚠️ Enable debug mode first: UniversalTracking.setDebugMode(true)"
+      );
       return;
     }
 
-    console.group('🧪 TESTING ALL TRACKING EVENTS');
-    
-    console.log('🧪 Testing Form Submission...');
-    this.trackFormSubmission('Test Form', 'test_source', { email: 'test@example.com' });
-    
-    console.log('🧪 Testing PDF Download...');
-    this.trackPDFDownload('test-file.pdf', 'test_download', 'mvp_roadmap');
-    
-    console.log('🧪 Testing Book Call Click...');
-    this.trackBookCallClick('test_button');
-    
-    console.log('🧪 Testing Calendar Booking...');
-    this.trackCalendarBooking('test_calendar', { test: true });
-    
-    console.log('🧪 Testing Contact Clicks...');
-    this.trackContactClick('email', 'test_location');
-    this.trackContactClick('phone', 'test_location');
-    
+    console.group("🧪 TESTING ALL TRACKING EVENTS");
+
+    console.log("🧪 Testing Form Submission...");
+    this.trackFormSubmission("Test Form", "test_source", {
+      email: "test@example.com",
+    });
+
+    console.log("🧪 Testing PDF Download...");
+    this.trackPDFDownload("test-file.pdf", "test_download", "mvp_roadmap");
+
+    console.log("🧪 Testing Book Call Click...");
+    this.trackBookCallClick("test_button");
+
+    console.log("🧪 Testing Calendar Booking...");
+    this.trackCalendarBooking("test_calendar", { test: true });
+
+    console.log("🧪 Testing Contact Clicks...");
+    this.trackContactClick("email", "test_location");
+    this.trackContactClick("phone", "test_location");
+
     console.groupEnd();
-    console.log('✅ Test complete! Check Events Manager in Facebook to see if events appeared.');
+    console.log(
+      "✅ Test complete! Check Events Manager in Facebook to see if events appeared."
+    );
   }
 }
 
