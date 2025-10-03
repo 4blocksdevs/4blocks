@@ -145,7 +145,7 @@ export default function ThankYouPage() {
     setFormData(initialFormData);
   };
 
-  const handleChecklistDownload = () => {
+  const handleRoadmapDownload = () => {
     // Track download with Universal Tracking
     UniversalTracking.trackPDFDownload(
       "MVP-Roadmap-4Blocks.pdf",
@@ -199,9 +199,9 @@ export default function ThankYouPage() {
           </div>
 
           <Button
-            id="checklistDownloadButton"
+            id="roadmapDownloadButton"
             type="button"
-            onClick={handleChecklistDownload}
+            onClick={handleRoadmapDownload}
             className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 text-base"
           >
             DOWNLOAD MVP ROADMAP
