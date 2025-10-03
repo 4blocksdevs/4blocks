@@ -29,6 +29,17 @@ export interface EventData {
 
 class UniversalTracking {
   private static isInitialized = false;
+  private static debugMode = false; // Set to true for detailed logging
+
+  /**
+   * Enable/disable debug mode for testing
+   */
+  static setDebugMode(enabled: boolean): void {
+    this.debugMode = enabled;
+    if (enabled) {
+      console.log('🔍 Universal Tracking Debug Mode ENABLED');
+    }
+  }
 
   /**
    * Initialize tracking service
@@ -52,12 +63,24 @@ class UniversalTracking {
     const attribution = UTMTracker.getAttribution();
     const enrichedData = this.enrichEventData(eventData, attribution);
 
+    if (this.debugMode) {
+      console.group(`🎯 TRACKING EVENT: ${eventData.event_type}`);
+      console.log('📝 Original Event Data:', eventData);
+      console.log('🏷️ Attribution Data:', attribution);
+      console.log('✨ Enriched Event Data:', enrichedData);
+    }
+
     // Fire events to all platforms
     this.trackMetaPixelEvent(enrichedData);
     this.trackHubSpotEvent(enrichedData);
     this.trackGoogleAnalyticsEvent(enrichedData);
 
-    console.log("Event tracked across all platforms:", enrichedData);
+    if (this.debugMode) {
+      console.log('✅ Event sent to all platforms');
+      console.groupEnd();
+    } else {
+      console.log(`🎯 Event tracked: ${eventData.event_type} →`, enrichedData);
+    }
   }
 
   /**
@@ -96,7 +119,12 @@ class UniversalTracking {
    * Track Meta Pixel events with proper event mapping
    */
   private static trackMetaPixelEvent(eventData: EventData): void {
-    if (!window.fbq) return;
+    if (!window.fbq) {
+      if (this.debugMode) {
+        console.warn('⚠️ Meta Pixel (fbq) not found - event not sent to Meta');
+      }
+      return;
+    }
 
     const { event_type } = eventData;
     let metaEvent = "Lead"; // Default event

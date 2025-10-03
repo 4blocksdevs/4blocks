@@ -5,7 +5,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import Footer from "../components/footer";
 import Image from "next/image";
-import TrackingInitializer from "@/components/TrackingInitializer";
+import TrackingInitializer from "../components/TrackingInitializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
