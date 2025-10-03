@@ -110,7 +110,7 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '4177892689146666');
+              fbq('init', '4277236155853060');
               fbq('track', 'PageView');
             `,
           }}
@@ -165,7 +165,7 @@ export default function RootLayout({
         <noscript
           dangerouslySetInnerHTML={{
             __html:
-              '<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=4177892689146666&ev=PageView&noscript=1" alt="" />',
+              '<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=4277236155853060&ev=PageView&noscript=1" alt="" />',
           }}
         />
         <TrackingInitializer />
