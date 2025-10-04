@@ -10,19 +10,20 @@
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "no-referrer-when-downgrade"
   Header always set X-XSS-Protection "1; mode=block"
-  # Consider tightening CSP below for production
-  Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:;"
+  # Strict Content Security Policy for production
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://js.hsforms.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com; font-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://api.hsforms.com; frame-src https://www.googletagmanager.com https://www.facebook.com https://calendly.com;"
+  # HTTP Strict Transport Security (HSTS)
+  Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
 </IfModule>
 
 ############################
-# Force HTTPS and remove www
+# Force HTTPS and remove www (production best practice)
 ############################
 RewriteEngine On
-# First, redirect www.example.com to example.com
+# Redirect www to non-www
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
-
-# Then force HTTPS (works behind proxies that set X-Forwarded-Proto)
+# Force HTTPS (works behind proxies that set X-Forwarded-Proto)
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -33,8 +34,7 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 Options -Indexes
 
 ############################
-# Serve existing .html files for clean URLs
-# e.g. request for /checklist will serve /checklist.html if it exists
+# Serve existing .html files for clean URLs (static export fallback)
 ############################
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -42,7 +42,6 @@ Options -Indexes
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME}.html -f
   RewriteRule ^ %{REQUEST_URI}.html [L]
-
 </IfModule>
 
 ############################
@@ -85,9 +84,7 @@ AddEncoding gzip svgz
 </IfModule>
 
 ############################
-# Optional: SPA fallback / static export
-# Uncomment if you exported Next.js as a static site (next export)
-############################
+# SPA fallback for static export (uncomment if using client-side routing only)
 # RewriteCond %{REQUEST_FILENAME} !-f
 # RewriteCond %{REQUEST_FILENAME} !-d
 # RewriteRule ^ /index.html [L]
