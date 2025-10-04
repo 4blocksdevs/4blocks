@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, CheckCircle } from "lucide-react";
 import UTMTracker from "@/lib/utm-tracker";
+import UniversalTracking from "@/lib/universal-tracking";
 import { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
 import { useRouter } from "next/navigation";
 
@@ -35,40 +36,13 @@ export default function ChecklistPage() {
   }, []);
 
   const handleChecklistDownload = () => {
-    // Track checklist download with checklist_download lead_source
-    const attribution = UTMTracker.getAttributionForMetaPixel();
-    const gaAttribution = UTMTracker.getAttributionForGA();
-
-    // Meta Pixel tracking - Step 4
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq(
-        "track",
-        trackingEvents.checklistPageDownload.metaPixel.event,
-        {
-          ...trackingEvents.checklistPageDownload.metaPixel.parameters,
-          ...attribution,
-          utm_source: attribution.utm_source,
-          utm_medium: attribution.utm_medium,
-          utm_campaign: attribution.utm_campaign,
-          utm_content: attribution.utm_content,
-        }
-      );
-    }
-
-    // Google Analytics tracking
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag(
-        "event",
-        trackingEvents.checklistPageDownload.googleAnalytics.event,
-        {
-          ...trackingEvents.checklistPageDownload.googleAnalytics.parameters,
-          ...gaAttribution,
-        }
-      );
-    }
-
-    // Update HubSpot property (if contact exists)
-    updateHubSpotProperty("checklist_downloaded", "Yes");
+    // Track checklist download with Universal Tracking
+    UniversalTracking.trackEvent({
+      event_type: "pdf_download",
+      file_name: "MVP-Checklist-4Blocks.pdf",
+      lead_source: leadSources.checklist_download,
+      download_type: "checklist",
+    });
 
     // Trigger actual download
     const link = document.createElement("a");
@@ -79,7 +53,7 @@ export default function ChecklistPage() {
     document.body.removeChild(link);
 
     // Optionally, redirect to a thank you page
-    router.push('/thank-you?type=checklist');
+    router.push("/thank-you?type=checklist");
   };
 
   const updateHubSpotProperty = async (property: string, value: string) => {
@@ -90,8 +64,6 @@ export default function ChecklistPage() {
 
   return (
     <div className="min-h-screen bg-white">
-    
-
       {/* Main Content */}
       <section className="container max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">

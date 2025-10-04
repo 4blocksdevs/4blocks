@@ -9,6 +9,7 @@ import { Download, Clock } from "lucide-react";
 import Image from "next/image";
 import Script from "next/script";
 import { useSearchParams } from "next/navigation";
+import UniversalTracking from "@/lib/universal-tracking";
 
 declare global {
   interface Window {
@@ -32,39 +33,15 @@ export default function ThankYouPage() {
   const [formData, setFormData] = useState(initialFormData);
 
   useEffect(() => {
+    // Initialize Universal Tracking
+    UniversalTracking.initialize();
+
     // Track thank you page view
-    if (typeof window !== "undefined") {
-      if (window.gtag) {
-        window.gtag("event", "page_view", {
-          page_title: "Thank You - MVP Roadmap",
-          page_location: window.location.href,
-        });
-      }
-
-      if (window.fbq) {
-        window.fbq("track", "CompleteRegistration");
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const checklistButton = document.getElementById("checklistDownloadButton");
-
-    const checklistHandler = () => {
-      if (window.fbq) {
-        window.fbq("track", "ChecklistDownload");
-      }
-    };
-
-    checklistButton?.addEventListener("click", checklistHandler);
-
-    return () => {
-      checklistButton?.removeEventListener("click", checklistHandler);
-    };
+    UniversalTracking.trackEvent({
+      event_type: "page_view",
+      lead_source: "thank_you_page",
+      page_title: "Thank You - MVP Roadmap",
+    });
   }, []);
 
   useEffect(() => {
@@ -81,9 +58,11 @@ export default function ThankYouPage() {
         "event" in data &&
         (data as { event?: string }).event === "calendly.event_scheduled"
       ) {
-        if (window.fbq) {
-          window.fbq("track", "BookedCall");
-        }
+        // Track calendar booking completion with Universal Tracking
+        UniversalTracking.trackCalendarBooking("calendly", {
+          event_details: data,
+          booking_source: "thank_you_page_embedded",
+        });
       }
     };
 
@@ -102,24 +81,12 @@ export default function ThankYouPage() {
   };
 
   const handleSecondaryDownload = async () => {
-    // Track secondary download
-    if (typeof window !== "undefined") {
-      if (window.gtag) {
-        window.gtag("event", "Download", {
-          event_category: "engagement",
-          event_label: "Secondary Download - Thank You Page",
-          value: 1,
-        });
-      }
-
-      if (window.fbq) {
-        window.fbq("track", "Purchase", {
-          content_name: "MVP Roadmap PDF Secondary",
-          value: 0,
-          currency: "USD",
-        });
-      }
-    }
+    // Track secondary download with Universal Tracking
+    UniversalTracking.trackPDFDownload(
+      "MVP-Roadmap-4Blocks.pdf",
+      "thank_you_page_secondary",
+      "mvp_roadmap"
+    );
 
     // Send email with PDF
     try {
@@ -144,63 +111,48 @@ export default function ThankYouPage() {
   };
 
   const handleBookCall = () => {
-    // Track Calendly booking intent
-    if (typeof window !== "undefined") {
-      if (window.gtag) {
-        window.gtag("event", "Schedule", {
-          event_category: "engagement",
-          event_label: "Calendly Booking Clicked",
-          value: 1,
-        });
-      }
+    // Track Calendly booking intent with Universal Tracking
+    UniversalTracking.trackBookCallClick("thank_you_page_button");
 
-      if (window.fbq) {
-        window.fbq("track", "Schedule");
-      }
-
-      if (
-        window.Calendly &&
-        typeof window.Calendly.initPopupWidget === "function"
-      ) {
-        window.Calendly.initPopupWidget({
-          url: "https://calendly.com/4blocksdevs/30min",
-        });
-      } else {
-        window.open(
-          "https://calendly.com/4blocksdevs/30min",
-          "_blank",
-          "noopener,noreferrer"
-        );
-      }
+    if (
+      window.Calendly &&
+      typeof window.Calendly.initPopupWidget === "function"
+    ) {
+      window.Calendly.initPopupWidget({
+        url: "https://calendly.com/4blocksdevs/30min",
+      });
+    } else {
+      window.open(
+        "https://calendly.com/4blocksdevs/30min",
+        "_blank",
+        "noopener,noreferrer"
+      );
     }
   };
 
   const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Track download event
-    if (typeof window !== "undefined") {
-      if (window.gtag) {
-        window.gtag("event", "Download", {
-          event_category: "engagement",
-          event_label: "Direct MVP Roadmap Download",
-          value: 1,
-        });
-      }
-      if (window.fbq) {
-        window.fbq("track", "Purchase", {
-          content_name: "MVP Roadmap PDF",
-          content_type: "product",
-          value: 0,
-          currency: "USD",
-        });
-      }
-    }
+
+    // Track download event with Universal Tracking
+    UniversalTracking.trackPDFDownload(
+      "MVP-Roadmap-4Blocks.pdf",
+      "thank_you_page_direct",
+      "mvp_roadmap"
+    );
+
     // Trigger PDF download
     triggerPdfDownload();
     setFormData(initialFormData);
   };
 
-  const handleChecklistDownload = () => {
+  const handleRoadmapDownload = () => {
+    // Track download with Universal Tracking
+    UniversalTracking.trackPDFDownload(
+      "MVP-Roadmap-4Blocks.pdf",
+      "thank_you_page_main_button",
+      "mvp_roadmap"
+    );
+
     triggerPdfDownload();
   };
 
@@ -247,9 +199,9 @@ export default function ThankYouPage() {
           </div>
 
           <Button
-            id="checklistDownloadButton"
+            id="roadmapDownloadButton"
             type="button"
-            onClick={handleChecklistDownload}
+            onClick={handleRoadmapDownload}
             className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 text-base"
           >
             DOWNLOAD MVP ROADMAP
@@ -410,6 +362,9 @@ export default function ThankYouPage() {
             href="#"
             onClick={(e) => {
               e.preventDefault();
+              // Track book call click with Universal Tracking
+              UniversalTracking.trackBookCallClick("thank_you_page_cta_link");
+
               if (
                 window.Calendly &&
                 typeof window.Calendly.initPopupWidget === "function"

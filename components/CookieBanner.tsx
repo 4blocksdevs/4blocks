@@ -42,7 +42,7 @@ export default function CookieBanner() {
             (window.dataLayer = window.dataLayer || []).push(arguments);
           };
         window.gtag("js", new Date());
-        window.gtag("config", "GA_MEASUREMENT_ID", {
+        window.gtag("config", "G-CC9W51TKC8", {
           anonymize_ip: true,
           cookie_expires: 63072000, // 2 years
         });

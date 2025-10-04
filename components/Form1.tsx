@@ -6,12 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { initializeHubSpot, type LeadData } from "@/lib/hubspot";
 import UTMTracker from "@/lib/utm-tracker";
-import {
-  trackingConfig,
-  trackingEvents,
-  leadSources,
-  hubspotProperties,
-} from "@/lib/enhanced-tracking-config";
+import UniversalTracking from "@/lib/universal-tracking";
+import { trackingConfig, leadSources } from "@/lib/enhanced-tracking-config";
 import { useRouter } from "next/navigation";
 
 interface Form1Props {
@@ -85,8 +81,12 @@ export default function Form1({
         ...attribution,
       };
 
-      // Track form submission events
-      trackFormSubmission();
+      // Track form submission events with Universal Tracking
+      UniversalTracking.trackFormSubmission(
+        "Form 1",
+        leadSources.hero_form,
+        leadData
+      );
 
       // Submit to HubSpot
       const hubspot = initializeHubSpot(
@@ -124,29 +124,8 @@ export default function Form1({
   };
 
   const trackFormSubmission = () => {
-    const attribution = UTMTracker.getAttributionForMetaPixel();
-    const gaAttribution = UTMTracker.getAttributionForGA();
-
-    // Meta Pixel tracking with lead_source
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", trackingEvents.form1.metaPixel.event, {
-        ...trackingEvents.form1.metaPixel.parameters,
-        ...attribution,
-        // Include UTM parameters as per plan
-        utm_source: attribution.utm_source,
-        utm_medium: attribution.utm_medium,
-        utm_campaign: attribution.utm_campaign,
-        utm_content: attribution.utm_content,
-      });
-    }
-
-    // Google Analytics tracking
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", trackingEvents.form1.googleAnalytics.event, {
-        ...trackingEvents.form1.googleAnalytics.parameters,
-        ...gaAttribution,
-      });
-    }
+    // This function is now replaced by UniversalTracking.trackFormSubmission
+    // Keeping for backward compatibility, but it's called above
   };
 
   // If HubSpot embed is working, show the embedded form

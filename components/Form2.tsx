@@ -5,12 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { initializeHubSpot, type LeadData } from "@/lib/hubspot";
 import UTMTracker from "@/lib/utm-tracker";
-import {
-  trackingConfig,
-  trackingEvents,
-  leadSources,
-  hubspotProperties,
-} from "@/lib/enhanced-tracking-config";
+import UniversalTracking from "@/lib/universal-tracking";
+import { trackingConfig, leadSources } from "@/lib/enhanced-tracking-config";
 import { Download } from "lucide-react";
 
 interface Form2Props {
@@ -39,7 +35,8 @@ export default function Form2({
     // Try to load HubSpot embed form
     if (
       trackingConfig.hubspot.portalId !== "146982667" &&
-      trackingConfig.hubspot.form2Id !== "3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3" &&
+      trackingConfig.hubspot.form2Id !==
+        "3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3" &&
       hubspotContainerRef.current
     ) {
       loadHubSpotForm();
@@ -82,8 +79,12 @@ export default function Form2({
         ...attribution,
       };
 
-      // Track form submission events
-      trackFormSubmission();
+      // Track form submission events with Universal Tracking
+      UniversalTracking.trackFormSubmission(
+        "Form 2",
+        leadSources.cta_form,
+        leadData
+      );
 
       // Submit to HubSpot
       const hubspot = initializeHubSpot(
@@ -119,56 +120,17 @@ export default function Form2({
   };
 
   const trackFormSubmission = () => {
-    const attribution = UTMTracker.getAttributionForMetaPixel();
-    const gaAttribution = UTMTracker.getAttributionForGA();
-
-    // Meta Pixel tracking with lead_source
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", trackingEvents.form2.metaPixel.event, {
-        ...trackingEvents.form2.metaPixel.parameters,
-        ...attribution,
-        // Include UTM parameters as per plan
-        utm_source: attribution.utm_source,
-        utm_medium: attribution.utm_medium,
-        utm_campaign: attribution.utm_campaign,
-        utm_content: attribution.utm_content,
-      });
-    }
-
-    // Google Analytics tracking
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", trackingEvents.form2.googleAnalytics.event, {
-        ...trackingEvents.form2.googleAnalytics.parameters,
-        ...gaAttribution,
-      });
-    }
+    // This function is now replaced by UniversalTracking.trackFormSubmission
+    // Keeping for backward compatibility, but it's called above
   };
 
   const triggerPDFDownload = () => {
-    // Track download event
-    const attribution = UTMTracker.getAttributionForMetaPixel();
-    const gaAttribution = UTMTracker.getAttributionForGA();
-
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", "DownloadPDF", {
-        lead_source: leadSources.cta_form,
-        content_name: "MVP Roadmap PDF",
-        content_type: "product",
-        value: 0,
-        currency: "USD",
-        ...attribution,
-      });
-    }
-
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "file_download", {
-        event_category: "PDF",
-        event_label: "Form 2 PDF Download",
-        file_name: "mvp-roadmap.pdf",
-        lead_source: leadSources.cta_form,
-        ...gaAttribution,
-      });
-    }
+    // Track download event with Universal Tracking
+    UniversalTracking.trackPDFDownload(
+      "MVP-Roadmap-4Blocks.pdf",
+      leadSources.cta_form,
+      "mvp_roadmap"
+    );
 
     // Create and trigger download
     const link = document.createElement("a");

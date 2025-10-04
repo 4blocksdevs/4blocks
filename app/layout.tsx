@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import Footer from "../components/footer";
 import Image from "next/image";
+import TrackingInitializer from "../components/TrackingInitializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -57,7 +58,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
     <html lang="en">
       <head>
@@ -110,7 +110,7 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
+              fbq('init', '4277236155853060');
               fbq('track', 'PageView');
             `,
           }}
@@ -168,6 +168,7 @@ export default function RootLayout({
               `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1" alt="" />`,
           }}
         />
+        <TrackingInitializer />
         <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
           <header className="container mx-auto px-4 py-6">

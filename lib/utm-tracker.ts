@@ -10,6 +10,10 @@ export interface UTMParameters {
   utm_id?: string;
   gclid?: string; // Google Ads click ID
   fbclid?: string; // Facebook click ID
+  // Facebook Ad specific tracking parameters
+  ad_id?: string; // Individual ad ID
+  adset_id?: string; // Ad set ID
+  campaign_id?: string; // Campaign ID
 }
 
 export interface AttributionData extends UTMParameters {
@@ -34,6 +38,10 @@ class UTMTracker {
     "utm_id",
     "gclid",
     "fbclid",
+    // Facebook Ad specific parameters for campaign optimization
+    "ad_id",
+    "adset_id",
+    "campaign_id",
   ];
 
   /**

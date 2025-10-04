@@ -250,11 +250,10 @@ class HubSpotTracker {
   private triggerPDFDownload(): void {
     // Track download event
     if (window.fbq) {
-      window.fbq("track", "Purchase", {
+      window.fbq("track", "DownloadPDF", {
         content_name: "MVP Roadmap PDF",
         content_type: "product",
-        value: 0,
-        currency: "USD",
+        pdf_type: "roadmap",
       });
     }
 
