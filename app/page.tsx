@@ -108,7 +108,6 @@ export default function LandingPage() {
 
     try {
       // Track lead event
-
       if (typeof window !== "undefined") {
         if (window.gtag) {
           window.gtag("event", "Lead", {
@@ -126,43 +125,50 @@ export default function LandingPage() {
         }
       }
 
-      // Submit to CRM (replace with actual CRM integration)
-      // const response = await fetch('/api/submit-lead', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     name: formData.name,
-      //     email: formData.email,
-      //     source: 'MVP Roadmap Landing Page'
-      //   }),
-      // });
+      // Debug logging
+      console.log("Submitting form with data:", formData);
+      console.log("HubSpot Portal ID:", process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID);
+      console.log("HubSpot Form ID:", process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID);
 
-      const response = await fetch(
-        `https://forms.hubspot.com/uploads/form/v2/${process.env.HUBSPOT_PORTAL_ID}/${process.env.HUBSPOT_FORM_ID}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            email: formData.email,
-            name: formData.name,
-          }),
-        }
-      );
+  const hubspotUrl = `https://forms.hubspot.com/uploads/form/v2/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID}`;
+      console.log("HubSpot URL:", hubspotUrl);
+
+      const formBody = new URLSearchParams({
+        email: formData.email,
+        name: formData.name,
+      });
+      console.log("Form body:", formBody.toString());
+
+      const response = await fetch(hubspotUrl, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formBody,
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
 
       if (response.ok) {
+        console.log("Form submitted successfully");
         // Redirect to thank you page
         router.push("/thank-you?type=roadmap");
       } else {
-        throw new Error("Form submission failed");
+        const errorText = await response.text();
+        console.error("HubSpot response error:", errorText);
+        throw new Error(`Form submission failed: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      router.push("/thank-you?type=roadmap");
       console.error("Error submitting form:", error);
+      
+      // Show user-friendly error message
       alert(
-        "There was an error submitting your information. Please try again."
+        "There was an error submitting your information. You'll be redirected to the thank you page anyway."
       );
+      
+      // Still redirect to thank you page for better UX
+      router.push("/thank-you?type=roadmap");
     } finally {
       setIsSubmitting(false);
     }

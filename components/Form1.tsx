@@ -56,8 +56,47 @@ export default function Form1({
         setUseHubSpotEmbed(true);
       }
     } catch (error) {
-      console.warn("Failed to load HubSpot form, using fallback:", error);
+      console.warn("Failed to load HubSpot form (v2), trying embed fallback:", error);
       setUseHubSpotEmbed(false);
+
+      // Fallback: use HubSpot embed snippet (region eu1 by default)
+      try {
+        const portalId = trackingConfig.hubspot.portalId;
+        const formId = trackingConfig.hubspot.form1Id;
+        const region = "eu1";
+
+        if (hubspotContainerRef.current) {
+          // Insert the required div for the embed
+          hubspotContainerRef.current.innerHTML = `
+            <div class="hs-form-frame" data-region="${region}" data-form-id="${formId}" data-portal-id="${portalId}"></div>
+          `;
+
+          // Avoid loading the same embed script multiple times
+          const existing = document.querySelector(
+            `script[src*="hsforms.net/forms/embed/${portalId}.js"]`
+          );
+
+          if (!existing) {
+            const script = document.createElement("script");
+            script.src = `https://js-${region}.hsforms.net/forms/embed/${portalId}.js`;
+            script.defer = true;
+            script.onload = () => {
+              console.log("HubSpot embed script loaded (fallback)");
+              setUseHubSpotEmbed(true);
+            };
+            script.onerror = (e) => {
+              console.warn("HubSpot embed script failed to load", e);
+            };
+            document.body.appendChild(script);
+          } else {
+            // If script already present, mark as embedded
+            setUseHubSpotEmbed(true);
+          }
+        }
+      } catch (embedError) {
+        console.warn("HubSpot embed fallback also failed:", embedError);
+        setUseHubSpotEmbed(false);
+      }
     }
   };
 

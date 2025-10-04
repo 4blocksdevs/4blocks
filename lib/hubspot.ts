@@ -150,39 +150,56 @@ class HubSpotTracker {
     try {
       const utmParams = this.getUTMParameters();
       const enrichedData = { ...data, ...utmParams };
-
-      // Submit to HubSpot using Forms API
-      const formData = new FormData();
-      formData.append("email", enrichedData.email);
-      formData.append("firstname", enrichedData.name);
-      if (enrichedData.phone) formData.append("phone", enrichedData.phone);
-      if (enrichedData.company)
-        formData.append("company", enrichedData.company);
-      if (enrichedData.utm_source)
-        formData.append("utm_source", enrichedData.utm_source);
-      if (enrichedData.utm_medium)
-        formData.append("utm_medium", enrichedData.utm_medium);
-      if (enrichedData.utm_campaign)
-        formData.append("utm_campaign", enrichedData.utm_campaign);
-      if (enrichedData.utm_content)
-        formData.append("utm_content", enrichedData.utm_content);
-      if (enrichedData.utm_term)
-        formData.append("utm_term", enrichedData.utm_term);
-
+      // Submit to HubSpot using the Submissions API with JSON payload
       const formId = data.form_type === "Form 1" ? this.form1Id : this.form2Id;
+
+      const hutk = typeof window !== "undefined" ? localStorage.getItem("hubspot_utk") || undefined : undefined;
+
+      const fields: Array<{ name: string; value: string | number | boolean }> = [
+        { name: "email", value: enrichedData.email },
+        { name: "firstname", value: enrichedData.name },
+      ];
+
+      if (enrichedData.phone) fields.push({ name: "phone", value: enrichedData.phone });
+      if (enrichedData.company) fields.push({ name: "company", value: enrichedData.company });
+      if (enrichedData.utm_source) fields.push({ name: "utm_source", value: enrichedData.utm_source });
+      if (enrichedData.utm_medium) fields.push({ name: "utm_medium", value: enrichedData.utm_medium });
+      if (enrichedData.utm_campaign) fields.push({ name: "utm_campaign", value: enrichedData.utm_campaign });
+      if (enrichedData.utm_content) fields.push({ name: "utm_content", value: enrichedData.utm_content });
+      if (enrichedData.utm_term) fields.push({ name: "utm_term", value: enrichedData.utm_term });
+
+      const payload: any = {
+        fields,
+        context: {
+          pageUri: typeof window !== "undefined" ? window.location.href : undefined,
+          pageName: typeof document !== "undefined" ? document.title : undefined,
+        },
+      };
+
+      if (hutk) {
+        payload.context.hutk = hutk;
+      }
+
       const response = await fetch(
         `https://api.hsforms.com/submissions/v3/integration/submit/${this.portalId}/${formId}`,
         {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         }
       );
 
+      const text = await response.text();
       if (response.ok) {
         // Fire tracking events
         this.trackFormSubmission(data.form_type);
+        console.log("HubSpot submission successful:", text);
         return true;
       }
+
+      console.error("HubSpot submission failed:", response.status, text);
       return false;
     } catch (error) {
       console.error("HubSpot submission error:", error);

@@ -3,18 +3,18 @@
 
 export const trackingConfig = {
   hubspot: {
-    portalId: "146982667", // Replace with your HubSpot Portal ID
-    form1Id: "abcdef12-3456-7890-abcd-ef1234567890", // Replace with your Form 1 ID
-    form2Id: "abcdef12-3456-7890-abcd-ef1234567890", // Replace with your Form 2 ID
+    portalId: process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || "YOUR_PORTAL_ID",
+    form1Id: process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID || "FORM_1_ID",
+    form2Id: process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID || "FORM_2_ID", // Using same form ID for both forms
   },
   metaPixel: {
-    pixelId: "4277236155853060", // Replace with your Meta Pixel ID
+    pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID || "4277236155853060",
   },
   googleAnalytics: {
-    measurementId: "G-CC9W51TKC8", // Google Analytics 4 Measurement ID
+    measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "GA_MEASUREMENT_ID",
   },
   googleTagManager: {
-    gtmId: "GTM-XXXXXX", // Replace with your GTM Container ID
+    gtmId: process.env.NEXT_PUBLIC_GTM_ID || "GTM-XXXXXX",
   },
   isDevelopment:
     typeof window !== "undefined" && window.location.hostname === "localhost",
