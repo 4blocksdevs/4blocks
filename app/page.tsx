@@ -130,7 +130,7 @@ export default function LandingPage() {
       console.log("HubSpot Portal ID:", process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID);
       console.log("HubSpot Form ID:", process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID);
 
-      const hubspotUrl = `https://forms.hubspot.com/uploads/form/v2/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID}`;
+  const hubspotUrl = `https://forms.hubspot.com/uploads/form/v2/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID}`;
       console.log("HubSpot URL:", hubspotUrl);
 
       const formBody = new URLSearchParams({
