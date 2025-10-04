@@ -4,9 +4,9 @@
 
 export const trackingConfig = {
   hubspot: {
-    portalId: "YOUR_PORTAL_ID", // Replace with your HubSpot Portal ID
-    form1Id: "FORM_1_ID", // Replace with your Form 1 ID
-    form2Id: "FORM_2_ID", // Replace with your Form 2 ID
+    portalId: "146982667", // Replace with your HubSpot Portal ID
+    form1Id: "3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3", // Replace with your Form 1 ID
+    form2Id: "3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3", // Replace with your Form 2 ID
   },
   metaPixel: {
     pixelId: "4277236155853060", // Replace with your Meta Pixel ID
