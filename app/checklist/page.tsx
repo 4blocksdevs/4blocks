@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -57,6 +55,41 @@ export default function ChecklistPage() {
           lead_source: leadSources.checklist_download,
           download_type: "checklist",
         });
+
+            // Google Analytics (gtag) event for file download with UTM attribution
+            if (typeof window !== "undefined" && (window as any).gtag) {
+              try {
+                (window as any).gtag("event", "file_download", {
+                  event_category: "engagement",
+                  event_label: "MVP-Checklist-4Blocks.pdf",
+                  value: 1,
+                  file_name: "MVP-Checklist-4Blocks.pdf",
+                  download_type: "checklist",
+                  lead_source: leadSources.checklist_download,
+                  // include UTM attribution for GA
+                  ...(UTMTracker.getAttributionForGA() || {}),
+                });
+              } catch (err) {
+                console.warn("gtag event failed", err);
+              }
+            }
+
+            // Google Tag Manager / dataLayer push with UTM fields
+            if (typeof window !== "undefined") {
+              try {
+                (window as any).dataLayer = (window as any).dataLayer || [];
+                (window as any).dataLayer.push({
+                  event: "pdf_download",
+                  file_name: "MVP-Checklist-4Blocks.pdf",
+                  download_type: "checklist",
+                  lead_source: leadSources.checklist_download,
+                  // include attribution fields for GTM/meta
+                  ...(UTMTracker.getAttributionForMetaPixel() || {}),
+                });
+              } catch (err) {
+                console.warn("dataLayer push failed", err);
+              }
+            }
 
         // Submit email to HubSpot (use primary form to consolidate contacts)
         const hubspot = initializeHubSpot(

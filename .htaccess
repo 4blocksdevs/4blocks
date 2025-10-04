@@ -43,8 +43,6 @@ Options -Indexes
   RewriteCond %{REQUEST_FILENAME}.html -f
   RewriteRule ^ %{REQUEST_URI}.html [L]
 
-  # Specific rule (redundant but explicit) for /checklist
-  RewriteRule ^checklist/?$ /checklist.html [L]
 </IfModule>
 
 ############################
