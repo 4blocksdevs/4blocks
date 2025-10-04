@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, CheckCircle } from "lucide-react";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
-import { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
+import trackingConfig, { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
+import { initializeHubSpot } from "@/lib/hubspot";
 import { useRouter } from "next/navigation";
 
 export default function ChecklistPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Initialize UTM tracking for checklist page
@@ -36,24 +40,66 @@ export default function ChecklistPage() {
   }, []);
 
   const handleChecklistDownload = () => {
-    // Track checklist download with Universal Tracking
-    UniversalTracking.trackEvent({
-      event_type: "pdf_download",
-      file_name: "MVP-Checklist-4Blocks.pdf",
-      lead_source: leadSources.checklist_download,
-      download_type: "checklist",
-    });
+    // Require email before download
+    if (!email || email.trim() === "") {
+      alert("Please enter your email to download the checklist.");
+      return;
+    }
 
-    // Trigger actual download
-    const link = document.createElement("a");
-    link.href = "/mvp-checklist.pdf"; // You'll need to create this file
-    link.download = "MVP-Checklist-4Blocks.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setIsSubmitting(true);
 
-    // Optionally, redirect to a thank you page
-    router.push("/thank-you?type=checklist");
+    (async () => {
+      try {
+        // Track checklist download with Universal Tracking
+        UniversalTracking.trackEvent({
+          event_type: "pdf_download",
+          file_name: "MVP-Checklist-4Blocks.pdf",
+          lead_source: leadSources.checklist_download,
+          download_type: "checklist",
+        });
+
+        // Submit email to HubSpot (use primary form to consolidate contacts)
+        const hubspot = initializeHubSpot(
+          trackingConfig.hubspot.portalId,
+          trackingConfig.hubspot.form1Id,
+          trackingConfig.hubspot.form2Id
+        );
+
+        const success = await hubspot.submitLead({
+          name: "",
+          email: email.trim(),
+          form_type: "Form 1",
+          lead_source: leadSources.checklist_download,
+        });
+
+        if (!success) {
+          console.warn("HubSpot submission failed for checklist download");
+        }
+
+        // Trigger actual download regardless of hubspot success
+        const link = document.createElement("a");
+        link.href = "/mvp-checklist.pdf"; // Ensure the file exists in public/
+        link.download = "MVP-Checklist-4Blocks.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Redirect to thank you page
+        router.push("/thank-you?type=checklist");
+      } catch (err) {
+        console.error("Error during checklist download flow:", err);
+        // Still attempt download and redirect
+        const link = document.createElement("a");
+        link.href = "/mvp-checklist.pdf";
+        link.download = "MVP-Checklist-4Blocks.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        router.push("/thank-you?type=checklist");
+      } finally {
+        setIsSubmitting(false);
+      }
+    })();
   };
 
   const updateHubSpotProperty = async (property: string, value: string) => {
@@ -120,12 +166,24 @@ export default function ChecklistPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Your step-by-step validation guide
                 </p>
+                <div className="mb-4">
+                  <Input
+                    id="checklist-email"
+                    type="email"
+                    placeholder="Enter your email to download"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="mb-3 focus:outline-none text-base border-[#9ED95D] border"
+                  />
+                </div>
                 <Button
                   onClick={handleChecklistDownload}
+                  disabled={isSubmitting}
                   className="bg-[#9ED95D] hover:bg-[#8bc94a] text-black font-bold px-6 py-3 text-base"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  DOWNLOAD CHECKLIST
+                  {isSubmitting ? "SENDING..." : "DOWNLOAD CHECKLIST"}
                 </Button>
               </CardContent>
             </Card>
