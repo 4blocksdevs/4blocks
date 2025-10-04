@@ -33,6 +33,21 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 Options -Indexes
 
 ############################
+# Serve existing .html files for clean URLs
+# e.g. request for /checklist will serve /checklist.html if it exists
+############################
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # If requested resource doesn't exist but a .html file exists, serve it
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^ %{REQUEST_URI}.html [L]
+
+  # Specific rule (redundant but explicit) for /checklist
+  RewriteRule ^checklist/?$ /checklist.html [L]
+</IfModule>
+
+############################
 # MIME types and CORS for fonts/svg
 ############################
 AddType image/svg+xml svg svgz
