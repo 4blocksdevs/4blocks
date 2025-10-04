@@ -112,7 +112,8 @@ class HubSpotTracker {
 
     window.hbspt.forms.create({
       portalId: this.portalId,
-      formId: this.form2Id,
+      // Use the same form id as Form 1 so both forms map to the same HubSpot contact list
+      formId: this.form1Id,
       target: `#${targetElementId}`,
       onFormReady: (form) => {
         console.log("HubSpot Form 2 ready");
@@ -139,8 +140,10 @@ class HubSpotTracker {
       onFormSubmitted: (form) => {
         console.log("Form 2 submitted successfully");
 
-        // Trigger PDF download
-        this.triggerPDFDownload();
+        // Redirect to thank you page instead of triggering a download
+        setTimeout(() => {
+          window.location.href = "/thank-you";
+        }, 800);
       },
     });
   }

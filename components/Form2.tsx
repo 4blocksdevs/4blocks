@@ -73,7 +73,8 @@ export default function Form2({
       const leadData: LeadData = {
         name: formData.name,
         email: formData.email,
-        form_type: "Form 2",
+        // Submit to the same HubSpot form as the hero (use Form 1 submission)
+        form_type: "Form 1",
         // Hidden fields as per funnel plan
         lead_source: leadSources.cta_form,
         ...attribution,
@@ -101,19 +102,23 @@ export default function Form2({
           email: formData.email,
         });
 
-        // Trigger PDF download
-        triggerPDFDownload();
-
         // Call success callback
         onSubmissionSuccess?.();
+
+        // Redirect to thank you page (do not download PDF here)
+        if (typeof window !== "undefined") {
+          window.location.href = "/thank-you?type=roadmap";
+        }
       } else {
         throw new Error("HubSpot submission failed");
       }
     } catch (error) {
       console.error("Form submission error:", error);
 
-      // Even on error, trigger download for better UX
-      triggerPDFDownload();
+      // On error, still redirect to thank-you for consistent UX
+      if (typeof window !== "undefined") {
+        window.location.href = "/thank-you?type=roadmap";
+      }
     } finally {
       setIsSubmitting(false);
     }
