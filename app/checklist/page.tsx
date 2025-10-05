@@ -8,12 +8,15 @@ import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
 import trackingConfig, { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
 import { initializeHubSpot } from "@/lib/hubspot";
+
 import { useRouter } from "next/navigation";
 
 export default function ChecklistPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   useEffect(() => {
     // Initialize UTM tracking for checklist page
@@ -38,8 +41,27 @@ export default function ChecklistPage() {
     }
   }, []);
 
+  const isUrl = (str: string) => {
+    try {
+      // Simple URL detection
+      const urlPattern = /https?:\/\//i;
+      return urlPattern.test(str);
+    } catch {
+      return false;
+    }
+  };
+
   const handleChecklistDownload = () => {
-    // Require email before download
+    // Require name and email before download
+    setNameError("");
+    if (!name || name.trim() === "") {
+      setNameError("Please enter your name.");
+      return;
+    }
+    if (isUrl(name)) {
+      setNameError("Name cannot contain a URL.");
+      return;
+    }
     if (!email || email.trim() === "") {
       alert("Please enter your email to download the checklist.");
       return;
@@ -92,15 +114,18 @@ export default function ChecklistPage() {
               }
             }
 
-        // Submit email to HubSpot (use primary form to consolidate contacts)
+
+        // Submit email to HubSpot using HUBSPOT_FORM_ID_2 for checklist
+        const portalId = process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || trackingConfig.hubspot.portalId;
+        const checklistFormId = process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID_2 || process.env.HUBSPOT_FORM_ID_2 || "";
         const hubspot = initializeHubSpot(
-          trackingConfig.hubspot.portalId,
-          trackingConfig.hubspot.form1Id,
-          trackingConfig.hubspot.form2Id
+          portalId,
+          checklistFormId,
+          checklistFormId
         );
 
         const success = await hubspot.submitLead({
-          name: "",
+          name: name.trim(),
           email: email.trim(),
           form_type: "Form 1",
           lead_source: leadSources.checklist_download,
@@ -201,6 +226,18 @@ export default function ChecklistPage() {
                   Your step-by-step validation guide
                 </p>
                 <div className="mb-4">
+                  <Input
+                    id="checklist-name"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="mb-2 focus:outline-none text-base border-[#9ED95D] border"
+                  />
+                  {nameError && (
+                    <div className="text-red-600 text-xs mb-2">{nameError}</div>
+                  )}
                   <Input
                     id="checklist-email"
                     type="email"
