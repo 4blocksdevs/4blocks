@@ -14,8 +14,6 @@ export const trackingConfig = {
     form2Id:
       process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID_2 ||
       process.env.HUBSPOT_FORM_ID_2 ||
-      process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID ||
-      process.env.HUBSPOT_FORM_ID ||
       "d2217c9d-3259-4524-a5a3-0ef6a7a3b2fe",
   },
   metaPixel: {
