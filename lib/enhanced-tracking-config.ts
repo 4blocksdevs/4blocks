@@ -3,18 +3,29 @@
 
 export const trackingConfig = {
   hubspot: {
-    portalId: process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || "YOUR_PORTAL_ID",
-    form1Id: process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID || "FORM_1_ID",
-    form2Id: process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID || "FORM_2_ID", // Using same form ID for both forms
+    portalId:
+      process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID ||
+      process.env.HUBSPOT_PORTAL_ID ||
+      "146982667",
+    form1Id:
+      process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID ||
+      process.env.HUBSPOT_FORM_ID ||
+      "3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3",
+    form2Id:
+      process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID_2 ||
+      process.env.HUBSPOT_FORM_ID_2 ||
+      process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID ||
+      process.env.HUBSPOT_FORM_ID ||
+      "d2217c9d-3259-4524-a5a3-0ef6a7a3b2fe",
   },
   metaPixel: {
     pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID || "4277236155853060",
   },
   googleAnalytics: {
-    measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "GA_MEASUREMENT_ID",
+    measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-CC9W51TKC8",
   },
   googleTagManager: {
-    gtmId: process.env.NEXT_PUBLIC_GTM_ID || "GTM-XXXXXX",
+    gtmId: process.env.NEXT_PUBLIC_GTM_ID || "GTM-54QBCC4Z",
   },
   isDevelopment:
     typeof window !== "undefined" && window.location.hostname === "localhost",
