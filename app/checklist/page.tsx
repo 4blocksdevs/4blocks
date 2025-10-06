@@ -67,6 +67,10 @@ export default function ChecklistPage() {
       return;
     }
 
+    // Get UTM params for GA
+    const utm = UTMTracker.getAttribution() || {};
+    const utmGA = UTMTracker.getAttributionForGA() || {};
+
     setIsSubmitting(true);
 
     (async () => {
@@ -89,8 +93,14 @@ export default function ChecklistPage() {
                   file_name: "MVP-Checklist-4Blocks.pdf",
                   download_type: "checklist",
                   lead_source: leadSources.checklist_download,
-                  // include UTM attribution for GA
-                  ...(UTMTracker.getAttributionForGA() || {}),
+                  // Standard UTM fields for GA4
+                  utm_source: utm.utm_source,
+                  utm_medium: utm.utm_medium,
+                  utm_campaign: utm.utm_campaign,
+                  utm_content: utm.utm_content,
+                  utm_term: utm.utm_term,
+                  // Custom fields
+                  ...utmGA,
                 });
               } catch (err) {
                 console.warn("gtag event failed", err);

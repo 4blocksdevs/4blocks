@@ -107,6 +107,8 @@ export default function Form1({
     try {
       // Get attribution data
       const attribution = UTMTracker.getAttributionForHubSpot();
+      const utm = UTMTracker.getAttribution() || {};
+      const utmGA = UTMTracker.getAttributionForGA() || {};
 
       // Prepare lead data with hidden fields
       const leadData: LeadData = {
@@ -126,6 +128,21 @@ export default function Form1({
         leadSources.hero_form,
         leadData
       );
+
+      // Google Analytics event with standard UTM fields
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "lead", {
+          event_category: "engagement",
+          event_label: "MVP Roadmap Download",
+          value: 1,
+          utm_source: utm.utm_source,
+          utm_medium: utm.utm_medium,
+          utm_campaign: utm.utm_campaign,
+          utm_content: utm.utm_content,
+          utm_term: utm.utm_term,
+          ...utmGA,
+        });
+      }
 
       // Submit to HubSpot
       const hubspot = initializeHubSpot(
