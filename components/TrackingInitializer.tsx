@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import UniversalTracking from "@/lib/universal-tracking";
+import UniversalTracking, { type TrackingEventType } from "@/lib/universal-tracking";
 import { usePathname, useSearchParams } from "next/navigation";
 import UTMTracker from "@/lib/utm-tracker";
 
@@ -38,25 +38,30 @@ const TrackingInitializer = () => {
     const utm = UTMTracker.getAttribution() || {};
     const utmGA = UTMTracker.getAttributionForGA() || {};
 
+    // Debug: Log UTM values and event payloads
+    console.log("[Tracking] UTM values:", utm);
+    console.log("[Tracking] UTM for GA:", utmGA);
+
     // GA4 page_view (explicit) on initial load + every route change
+    const gaPayload = {
+      page_location: url,
+      page_title: title,
+      utm_source: utm.utm_source,
+      utm_medium: utm.utm_medium,
+      utm_campaign: utm.utm_campaign,
+      utm_content: utm.utm_content,
+      utm_term: utm.utm_term,
+      ...utmGA,
+    };
+    console.log("[Tracking] GA4 page_view payload:", gaPayload);
     if (window.gtag) {
-      window.gtag("event", "page_view", {
-        page_location: url,
-        page_title: title,
-        utm_source: utm.utm_source,
-        utm_medium: utm.utm_medium,
-        utm_campaign: utm.utm_campaign,
-        utm_content: utm.utm_content,
-        utm_term: utm.utm_term,
-        ...utmGA,
-      });
+      window.gtag("event", "page_view", gaPayload);
     } else if (initialLoadRef.current) {
       console.warn("[Tracking] window.gtag not available on initial route event.");
     }
 
     // dataLayer push for GTM if present
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).dataLayer.push({
+    const dataLayerPayload = {
       event: "page_view",
       page_location: url,
       page_title: title,
@@ -65,15 +70,20 @@ const TrackingInitializer = () => {
       utm_campaign: utm.utm_campaign,
       utm_content: utm.utm_content,
       utm_term: utm.utm_term,
-    });
+    };
+    console.log("[Tracking] dataLayer page_view payload:", dataLayerPayload);
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push(dataLayerPayload);
 
     // Universal internal tracker
-    UniversalTracking.trackEvent({
-      event_type: "page_view",
+    const universalPayload = {
+      event_type: "page_view" as TrackingEventType,
       page_title: title,
       page_location: url,
       lead_source: utm.utm_source || "direct",
-    });
+    };
+    console.log("[Tracking] UniversalTracking page_view payload:", universalPayload);
+    UniversalTracking.trackEvent(universalPayload);
 
     initialLoadRef.current = false;
   }, [pathname, searchParams]);
