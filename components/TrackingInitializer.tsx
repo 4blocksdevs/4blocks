@@ -15,7 +15,7 @@ const TrackingInitializer = () => {
 
     // Diagnostics for misconfiguration
     const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-    const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+    const gtmId = "GTM-5N39QMDC";
     if (!gaId) {
       console.warn("[Tracking] GA Measurement ID missing (NEXT_PUBLIC_GA_MEASUREMENT_ID)");
     }
