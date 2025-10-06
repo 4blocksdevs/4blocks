@@ -25,7 +25,7 @@ export const trackingConfig = {
     measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-CC9W51TKC8",
   },
   googleTagManager: {
-    gtmId: process.env.NEXT_PUBLIC_GTM_ID || "GTM-54QBCC4Z",
+    gtmId: process.env.NEXT_PUBLIC_GTM_ID || "GTM-5N39QMDC",
   },
   isDevelopment:
     typeof window !== "undefined" && window.location.hostname === "localhost",
