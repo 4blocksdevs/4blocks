@@ -20,6 +20,33 @@ export function trackAndDownloadPDF({
     const inferredName = fileName || filePath.split("/").pop() || "download.pdf";
     UniversalTracking.trackPDFDownload(inferredName, leadSource, downloadType);
 
+    // Send UTM data to Brevo (if email is available in window or session)
+    let email = undefined;
+    // Try to get email from global context, session, or prompt (customize as needed)
+    if (typeof window !== "undefined") {
+      email = window.sessionStorage?.getItem("lead_email") || window.localStorage?.getItem("lead_email");
+    }
+    if (email) {
+      // Dynamically import to avoid SSR issues
+      import("@/lib/brevo-client")
+        .then((mod) => {
+          // Some builds use default, some named export
+          const fn = mod.subscribeToBrevo || mod.default;
+          if (typeof fn === "function") {
+            fn({
+              email,
+              lead_source: leadSource,
+              tags: [downloadType],
+            });
+          } else {
+            console.warn("Brevo subscribeToBrevo not found in module", mod);
+          }
+        })
+        .catch((err) => {
+          console.warn("Brevo dynamic import failed", err);
+        });
+    }
+
     if (!autoClick) return;
 
     const a = document.createElement("a");

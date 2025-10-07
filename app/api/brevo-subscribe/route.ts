@@ -82,6 +82,35 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Brevo error", detail: errText }, { status: brevoRes.status });
     }
 
+    // If this is a PDF download (tags include 'pdf' or 'mvp_roadmap'), log a custom event to Brevo Events API
+    const tags = body.tags || [];
+    if (tags.includes("pdf") || tags.includes("mvp_roadmap")) {
+      // Compose event payload
+      const eventPayload = {
+        event_name: "pdf_downloaded",
+        event_date: new Date().toISOString(),
+        identifiers: {
+          email_id: body.email,
+        },
+        contact_properties: { ...attributes },
+        event_properties: {
+          file_name: tags.includes("mvp_roadmap") ? "MVP Roadmap PDF" : "PDF Download",
+          lead_source: body.lead_source,
+          ...body.utm,
+        },
+      };
+      // Send event to Brevo
+      await fetch("https://api.brevo.com/v3/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": apiKey,
+          accept: "application/json",
+        },
+        body: JSON.stringify(eventPayload),
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: "Unexpected server error", detail: err?.message }, { status: 500 });
