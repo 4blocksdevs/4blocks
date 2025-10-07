@@ -8,6 +8,7 @@ import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
 import trackAndDownloadPDF from "@/lib/download-tracking";
 import { trackingConfig, leadSources } from "@/lib/enhanced-tracking-config";
+import { subscribeToBrevo } from "@/lib/brevo-client";
 import { Download } from "lucide-react";
 
 interface Form2Props {
@@ -112,7 +113,17 @@ export default function Form2({
         trackingConfig.hubspot.form2Id
       );
 
-      const success = await hubspot.submitLead(leadData);
+      const [hubspotOk, brevoOk] = await Promise.all([
+        hubspot.submitLead(leadData),
+        subscribeToBrevo({
+          email: formData.email,
+          firstName: formData.name,
+          lead_source: leadSources.cta_form,
+          tags: ["mvp_roadmap"],
+        }),
+      ]);
+
+      const success = hubspotOk;
 
       if (success) {
         // Track successful conversion

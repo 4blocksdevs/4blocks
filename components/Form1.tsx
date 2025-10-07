@@ -8,6 +8,7 @@ import { initializeHubSpot, type LeadData } from "@/lib/hubspot";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
 import { trackingConfig, leadSources } from "@/lib/enhanced-tracking-config";
+import { subscribeToBrevo } from "@/lib/brevo-client";
 import { useRouter } from "next/navigation";
 
 interface Form1Props {
@@ -151,7 +152,18 @@ export default function Form1({
         trackingConfig.hubspot.form2Id
       );
 
-      const success = await hubspot.submitLead(leadData);
+      const [hubspotOk, brevoOk] = await Promise.all([
+        hubspot.submitLead(leadData),
+        subscribeToBrevo({
+          email: formData.email,
+          firstName: formData.name,
+          company: formData.company || undefined,
+          lead_source: leadSources.hero_form,
+          tags: ["mvp_roadmap"],
+        }),
+      ]);
+
+      const success = hubspotOk; // maintain existing redirect logic tied to HubSpot
 
       if (success) {
         // Track successful conversion
@@ -173,7 +185,7 @@ export default function Form1({
       console.error("Form submission error:", error);
 
       // Even on error, redirect to thank you page for better UX
-      router.push("/thank-you");
+  router.push("/thank-you?type=roadmap");
     } finally {
       setIsSubmitting(false);
     }
