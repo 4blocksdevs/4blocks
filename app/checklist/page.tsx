@@ -8,6 +8,7 @@ import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
 import trackingConfig, { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
 import { initializeHubSpot } from "@/lib/hubspot";
+import trackAndDownloadPDF from "@/lib/download-tracking";
 
 import { useRouter } from "next/navigation";
 
@@ -75,37 +76,16 @@ export default function ChecklistPage() {
 
     (async () => {
       try {
-        // Track checklist download with Universal Tracking
-        UniversalTracking.trackEvent({
-          event_type: "pdf_download",
-          file_name: "MVP-Checklist-4Blocks.pdf",
-          lead_source: leadSources.checklist_download,
-          download_type: "checklist",
+        // Track & prepare download (will actually download later)
+        trackAndDownloadPDF({
+          filePath: "/mvp-checklist.pdf",
+          fileName: "MVP-Checklist-4Blocks.pdf",
+          leadSource: leadSources.checklist_download,
+          downloadType: "checklist",
+          autoClick: false,
         });
 
-            // Google Analytics (gtag) event for file download with UTM attribution
-            if (typeof window !== "undefined" && (window as any).gtag) {
-              try {
-                (window as any).gtag("event", "file_download", {
-                  event_category: "engagement",
-                  event_label: "MVP-Checklist-4Blocks.pdf",
-                  value: 1,
-                  file_name: "MVP-Checklist-4Blocks.pdf",
-                  download_type: "checklist",
-                  lead_source: leadSources.checklist_download,
-                  // Standard UTM fields for GA4
-                  utm_source: utm.utm_source,
-                  utm_medium: utm.utm_medium,
-                  utm_campaign: utm.utm_campaign,
-                  utm_content: utm.utm_content,
-                  utm_term: utm.utm_term,
-                  // Custom fields
-                  ...utmGA,
-                });
-              } catch (err) {
-                console.warn("gtag event failed", err);
-              }
-            }
+            // Removed manual gtag file_download; centralized tracking handles GA + GTM + Meta
 
             // Google Tag Manager / dataLayer push with UTM fields
             if (typeof window !== "undefined") {
@@ -145,25 +125,27 @@ export default function ChecklistPage() {
           console.warn("HubSpot submission failed for checklist download");
         }
 
-        // Trigger actual download regardless of hubspot success
-        const link = document.createElement("a");
-        link.href = "/mvp-checklist.pdf"; // Ensure the file exists in public/
-        link.download = "MVP-Checklist-4Blocks.pdf";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Trigger actual download regardless of hubspot success (already tracked)
+        trackAndDownloadPDF({
+          filePath: "/mvp-checklist.pdf",
+          fileName: "MVP-Checklist-4Blocks.pdf",
+          leadSource: leadSources.checklist_download,
+          downloadType: "checklist",
+          autoClick: true,
+        });
 
         // Redirect to thank you page
         router.push("/thank-you?type=checklist");
       } catch (err) {
         console.error("Error during checklist download flow:", err);
         // Still attempt download and redirect
-        const link = document.createElement("a");
-        link.href = "/mvp-checklist.pdf";
-        link.download = "MVP-Checklist-4Blocks.pdf";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        trackAndDownloadPDF({
+          filePath: "/mvp-checklist.pdf",
+          fileName: "MVP-Checklist-4Blocks.pdf",
+          leadSource: leadSources.checklist_download + "_error",
+          downloadType: "checklist",
+          autoClick: true,
+        });
         router.push("/thank-you?type=checklist");
       } finally {
         setIsSubmitting(false);

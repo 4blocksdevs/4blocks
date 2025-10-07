@@ -14,6 +14,7 @@ import Form2 from "@/components/Form2";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
 import { trackingEvents } from "@/lib/tracking-config";
+import trackAndDownloadPDF from "@/lib/download-tracking";
 
 declare global {
   interface Window {
@@ -74,21 +75,23 @@ export default function LandingPage() {
     };
 
     const downloadHandler = () => {
-      // Track download with Universal Tracking
-      UniversalTracking.trackPDFDownload(
-        "MVP-Roadmap-4Blocks.pdf",
-        "main_page_bottom_form",
-        "mvp_roadmap"
-      );
+      trackAndDownloadPDF({
+        filePath: "/mvp-roadmap.pdf",
+        fileName: "MVP-Roadmap-4Blocks.pdf",
+        leadSource: "main_page_bottom_form",
+        downloadType: "mvp_roadmap",
+        autoClick: false,
+      });
     };
 
     const pdfDownloadHandler = () => {
-      // Track PDF download with Universal Tracking
-      UniversalTracking.trackPDFDownload(
-        "MVP-Roadmap-4Blocks.pdf",
-        "main_page_pdf_button",
-        "mvp_roadmap"
-      );
+      trackAndDownloadPDF({
+        filePath: "/mvp-roadmap.pdf",
+        fileName: "MVP-Roadmap-4Blocks.pdf",
+        leadSource: "main_page_pdf_button",
+        downloadType: "mvp_roadmap",
+        autoClick: false,
+      });
     };
 
     mainForm?.addEventListener("submit", leadHandler);
@@ -176,19 +179,13 @@ export default function LandingPage() {
 
   const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Track download event with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "main_page_direct_download",
-      "mvp_roadmap"
-    );
-
-    // Trigger PDF download
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf"; // Replace with actual PDF path
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    link.click();
+    trackAndDownloadPDF({
+      filePath: "/mvp-roadmap.pdf",
+      fileName: "MVP-Roadmap-4Blocks.pdf",
+      leadSource: "main_page_direct_download",
+      downloadType: "mvp_roadmap",
+      autoClick: true,
+    });
   };
 
   return (

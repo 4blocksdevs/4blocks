@@ -6,6 +6,7 @@ import Script from "next/script";
 import Footer from "../components/footer";
 import Image from "next/image";
 import TrackingInitializer from "../components/TrackingInitializer";
+import PDFDownloadTracker from "../components/PDFDownloadTracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -75,9 +76,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         />
 
-        {/* Google Analytics 4 */}
-        {/* <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+        {/*Google Analytics 4 */}
+         <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=G-CC9W51TKC8`}
           strategy="afterInteractive"
         />
         <Script
@@ -94,7 +95,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               });
             `,
           }}
-        /> */}
+        />
 
         {/* Meta Pixel */}
         <Script
@@ -168,7 +169,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1" alt="" />`,
           }}
         />
-        <TrackingInitializer />
+  <TrackingInitializer />
+  <PDFDownloadTracker />
         <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
           <header className="container mx-auto px-4 py-6">

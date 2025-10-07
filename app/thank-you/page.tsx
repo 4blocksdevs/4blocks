@@ -10,6 +10,7 @@ import Image from "next/image";
 import Script from "next/script";
 import { useSearchParams } from "next/navigation";
 import UniversalTracking from "@/lib/universal-tracking";
+import trackAndDownloadPDF from "@/lib/download-tracking";
 
 declare global {
   interface Window {
@@ -73,22 +74,18 @@ export default function ThankYouPage() {
     };
   }, []);
 
-  const triggerPdfDownload = () => {
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf";
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    link.click();
+  const triggerPdfDownload = (source: string) => {
+    trackAndDownloadPDF({
+      filePath: "/mvp-roadmap.pdf",
+      fileName: "MVP-Roadmap-4Blocks.pdf",
+      leadSource: source,
+      downloadType: "mvp_roadmap",
+      autoClick: true,
+    });
   };
 
   const handleSecondaryDownload = async () => {
-    // Track secondary download with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "thank_you_page_secondary",
-      "mvp_roadmap"
-    );
-
-    // Send email with PDF
+    // Send email with PDF; tracking will fire only if fallback download occurs
     try {
       const response = await fetch("/api/send-pdf", {
         method: "POST",
@@ -99,14 +96,20 @@ export default function ThankYouPage() {
       });
 
       if (response.ok) {
+        // Optionally track secondary success event
+        UniversalTracking.trackPDFDownload(
+          "MVP-Roadmap-4Blocks.pdf",
+          "thank_you_page_secondary_email_sent",
+          "mvp_roadmap"
+        );
         alert("PDF sent successfully to your email!");
       } else {
         throw new Error("Failed to send PDF");
       }
     } catch (error) {
       console.error("Error sending PDF:", error);
-      // Fallback to direct download
-      triggerPdfDownload();
+      // Fallback to direct download with tracking
+      triggerPdfDownload("thank_you_page_secondary_fallback");
     }
   };
 
@@ -133,27 +136,12 @@ export default function ThankYouPage() {
   const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Track download event with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "thank_you_page_direct",
-      "mvp_roadmap"
-    );
-
-    // Trigger PDF download
-    triggerPdfDownload();
+    triggerPdfDownload("thank_you_page_direct");
     setFormData(initialFormData);
   };
 
   const handleRoadmapDownload = () => {
-    // Track download with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "thank_you_page_main_button",
-      "mvp_roadmap"
-    );
-
-    triggerPdfDownload();
+    triggerPdfDownload("thank_you_page_main_button");
   };
 
   return (

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { initializeHubSpot, type LeadData } from "@/lib/hubspot";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
+import trackAndDownloadPDF from "@/lib/download-tracking";
 import { trackingConfig, leadSources } from "@/lib/enhanced-tracking-config";
 import { Download } from "lucide-react";
 
@@ -147,20 +148,13 @@ export default function Form2({
   };
 
   const triggerPDFDownload = () => {
-    // Track download event with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      leadSources.cta_form,
-      "mvp_roadmap"
-    );
-
-    // Create and trigger download
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf";
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    trackAndDownloadPDF({
+      filePath: "/mvp-roadmap.pdf",
+      fileName: "MVP-Roadmap-4Blocks.pdf",
+      leadSource: leadSources.cta_form,
+      downloadType: "mvp_roadmap",
+      autoClick: true,
+    });
   };
 
   // If HubSpot embed is working, show the embedded form

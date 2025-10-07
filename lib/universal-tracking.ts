@@ -75,6 +75,35 @@ class UniversalTracking {
     this.trackHubSpotEvent(enrichedData);
     this.trackGoogleAnalyticsEvent(enrichedData);
 
+    // Push to GTM dataLayer for additional tags (if present)
+    try {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: enrichedData.event_type,
+        event_type: enrichedData.event_type,
+        file_name: enrichedData.file_name,
+        form_type: enrichedData.form_type,
+        lead_source: enrichedData.lead_source,
+        download_type: enrichedData.download_type,
+        page_url: enrichedData.page_url,
+        page_title: enrichedData.page_title,
+        timestamp: enrichedData.timestamp,
+        // UTM / attribution
+        utm_source: enrichedData.utm_source,
+        utm_medium: enrichedData.utm_medium,
+        utm_campaign: enrichedData.utm_campaign,
+        utm_content: enrichedData.utm_content,
+        utm_term: enrichedData.utm_term,
+        fbclid: enrichedData.fbclid,
+        gclid: enrichedData.gclid,
+        ad_id: enrichedData.ad_id,
+        adset_id: enrichedData.adset_id,
+        campaign_id: enrichedData.campaign_id,
+      });
+    } catch (e) {
+      if (this.debugMode) console.warn("dataLayer push failed", e);
+    }
+
     if (this.debugMode) {
       console.log("✅ Event sent to all platforms");
       console.groupEnd();
