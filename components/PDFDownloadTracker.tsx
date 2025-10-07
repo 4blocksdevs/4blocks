@@ -7,8 +7,8 @@ import UTMTracker from "@/lib/utm-tracker";
  * PDFDownloadTracker
  * --------------------------------------
  * Automatically listens for clicks on <a> tags whose href ends with .pdf
- * and fires a unified tracking event (Meta Pixel, GA, HubSpot enrichment via
- * UniversalTracking).
+ * and fires a unified tracking event through UniversalTracking (Meta Pixel via
+ * standard + custom events; for PDFs we use trackCustom('DownloadPDF')).
  *
  * Enhancements:
  * - Supports custom attributes: data-download-type, data-lead-source, data-file-name

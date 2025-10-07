@@ -104,6 +104,14 @@ class UniversalTracking {
       if (this.debugMode) console.warn("dataLayer push failed", e);
     }
 
+    // Dispatch a DOM CustomEvent so other integrations (e.g., Brevo) can listen without tight coupling
+    try {
+      const evt = new CustomEvent("universal-tracking-event", { detail: enrichedData });
+      window.dispatchEvent(evt);
+    } catch (e) {
+      if (this.debugMode) console.warn("CustomEvent dispatch failed", e);
+    }
+
     if (this.debugMode) {
       console.log("✅ Event sent to all platforms");
       console.groupEnd();
@@ -160,9 +168,9 @@ class UniversalTracking {
       return;
     }
 
-    const { event_type } = eventData;
-    let metaEvent = "Lead"; // Default event
-    const params: any = {};
+  const { event_type } = eventData;
+  let metaEvent: string | null = "Lead"; // Default for mappable standard events
+  const params: any = {};
 
     // Map event types to Meta Pixel events
     switch (event_type) {
@@ -174,8 +182,9 @@ class UniversalTracking {
         break;
 
       case "pdf_download":
-        // Use custom event for free downloads instead of Purchase
-        metaEvent = "DownloadPDF";
+        // For custom events, Meta recommends using trackCustom ONLY.
+        // We'll still populate params and later call trackCustom('DownloadPDF', params).
+        metaEvent = null; // prevents non-standard fbq('track', 'DownloadPDF') usage
         params.content_name = eventData.file_name || "PDF Download";
         params.content_type = "free_resource";
         params.download_type = eventData.download_type || "pdf";
@@ -228,22 +237,34 @@ class UniversalTracking {
       console.log(`📱 META PIXEL EVENT: ${metaEvent}`, params);
     }
 
-    // Fire Meta Pixel event
-    window.fbq("track", metaEvent, params);
+    // Fire Meta Pixel standard event only if metaEvent is a recognized standard event.
+    if (metaEvent) {
+      window.fbq("track", metaEvent, params);
+      if (this.debugMode) {
+        console.log(`📱 META PIXEL EVENT (standard): ${metaEvent}`, params);
+      }
+    }
 
-    // Also fire custom event for detailed tracking
-    const customEventName = `Custom_${event_type}`;
-    const customParams = {
-      ...params,
-      custom_event_type: event_type,
-      page_url: eventData.page_url,
-      timestamp: eventData.timestamp,
-    };
-
-    window.fbq("trackCustom", customEventName, customParams);
-
-    if (this.debugMode) {
-      console.log(`📱 META CUSTOM EVENT: ${customEventName}`, customParams);
+    // Always send the intended custom event for PDF downloads & other custom granularity
+    // pdf_download -> 'DownloadPDF'
+    if (event_type === "pdf_download") {
+      window.fbq("trackCustom", "DownloadPDF", params);
+      if (this.debugMode) {
+        console.log("📱 META CUSTOM EVENT: DownloadPDF", params);
+      }
+    } else {
+      // Maintain custom names for other events for detailed diagnostics
+      const customEventName = `Custom_${event_type}`;
+      const customParams = {
+        ...params,
+        custom_event_type: event_type,
+        page_url: eventData.page_url,
+        timestamp: eventData.timestamp,
+      };
+      window.fbq("trackCustom", customEventName, customParams);
+      if (this.debugMode) {
+        console.log(`📱 META CUSTOM EVENT: ${customEventName}`, customParams);
+      }
     }
   }
 

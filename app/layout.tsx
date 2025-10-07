@@ -7,6 +7,7 @@ import Footer from "../components/footer";
 import Image from "next/image";
 import TrackingInitializer from "../components/TrackingInitializer";
 import PDFDownloadTracker from "../components/PDFDownloadTracker";
+import BrevoTracking from "../components/BrevoTracking";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -171,6 +172,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
   <TrackingInitializer />
   <PDFDownloadTracker />
+  <BrevoTracking />
         <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
           <header className="container mx-auto px-4 py-6">

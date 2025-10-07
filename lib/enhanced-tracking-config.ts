@@ -87,6 +87,7 @@ export const trackingEvents = {
   thankYouDownload: {
     leadSource: leadSources.thankyou_download,
     metaPixel: {
+      // Using custom Meta event via fbq('trackCustom','DownloadPDF')
       event: "DownloadPDF",
       parameters: {
         lead_source: leadSources.thankyou_download,
@@ -132,6 +133,7 @@ export const trackingEvents = {
   checklistFromPDF: {
     leadSource: leadSources.checklist_download,
     metaPixel: {
+      // Custom checklist event; delivered via trackCustom('DownloadChecklist') if used directly
       event: "DownloadChecklist",
       parameters: {
         lead_source: leadSources.checklist_download,
