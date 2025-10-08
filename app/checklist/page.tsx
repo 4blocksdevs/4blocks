@@ -68,6 +68,11 @@ export default function ChecklistPage() {
       return;
     }
 
+    // Store email for attribution/tracking
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("lead_email", email.trim());
+    }
+
     // Get UTM params for GA
     const utm = UTMTracker.getAttribution() || {};
     const utmGA = UTMTracker.getAttributionForGA() || {};
@@ -85,9 +90,7 @@ export default function ChecklistPage() {
           autoClick: false,
         });
 
-            // Removed manual gtag file_download; centralized tracking handles GA + GTM + Meta
-
-            // Google Tag Manager / dataLayer push with UTM fields
+        // ...existing code...
             if (typeof window !== "undefined") {
               try {
                 (window as any).dataLayer = (window as any).dataLayer || [];

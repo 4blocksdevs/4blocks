@@ -112,6 +112,10 @@ export default function LandingPage() {
     try {
       // Track lead event
       if (typeof window !== "undefined") {
+        // Store email for attribution/tracking
+        if (formData.email) {
+          window.localStorage.setItem("lead_email", formData.email);
+        }
         if (window.gtag) {
           window.gtag("event", "Lead", {
             event_category: "engagement",
@@ -133,7 +137,7 @@ export default function LandingPage() {
       console.log("HubSpot Portal ID:", process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID);
       console.log("HubSpot Form ID:", process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID);
 
-  const hubspotUrl = `https://forms.hubspot.com/uploads/form/v2/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID}`;
+      const hubspotUrl = `https://forms.hubspot.com/uploads/form/v2/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID}`;
       console.log("HubSpot URL:", hubspotUrl);
 
       const formBody = new URLSearchParams({
@@ -164,12 +168,10 @@ export default function LandingPage() {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      
       // Show user-friendly error message
       alert(
         "There was an error submitting your information. You'll be redirected to the thank you page anyway."
       );
-      
       // Still redirect to thank you page for better UX
       router.push("/thank-you?type=roadmap");
     } finally {
