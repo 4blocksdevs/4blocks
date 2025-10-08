@@ -23,7 +23,8 @@ export async function POST(req: Request) {
 
   try {
     // const apiKey = process.env.BREVO_API_KEY;
-      const apiKey = process.env.BREVO_API_KEY;
+    const apiKey = process.env.BREVO_API_KEY;
+    console.log("BREVO_API_KEY:", apiKey);
     if (!apiKey) {
       return NextResponse.json({ error: "Server missing BREVO_API_KEY" }, { status: 500 });
     }
@@ -67,15 +68,21 @@ export async function POST(req: Request) {
       tags: body.tags && body.tags.length ? body.tags : undefined,
     };
 
-    const brevoRes = await fetch("https://api.brevo.com/v3/contacts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": apiKey,
-        accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    let brevoRes;
+    try {
+      brevoRes = await fetch("https://api.brevo.com/v3/contacts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": apiKey,
+          accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (fetchErr: any) {
+      console.error("Error during Brevo contacts fetch:", fetchErr);
+      return NextResponse.json({ error: "Brevo contacts fetch failed", detail: fetchErr?.message || String(fetchErr) }, { status: 502 });
+    }
 
     // Brevo returns 201 for new, 204 for updated (sometimes 200). We'll surface status.
     if (!brevoRes.ok && brevoRes.status !== 201 && brevoRes.status !== 204) {
@@ -101,15 +108,20 @@ export async function POST(req: Request) {
         },
       };
       // Send event to Brevo
-      await fetch("https://api.brevo.com/v3/events", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": apiKey,
-          accept: "application/json",
-        },
-        body: JSON.stringify(eventPayload),
-      });
+      try {
+        await fetch("https://api.brevo.com/v3/events", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "api-key": apiKey,
+            accept: "application/json",
+          },
+          body: JSON.stringify(eventPayload),
+        });
+      } catch (eventErr: any) {
+        console.error("Error during Brevo events fetch:", eventErr);
+        // Don't fail the whole request, but log the error
+      }
     }
 
     return NextResponse.json({ success: true });
