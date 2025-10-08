@@ -159,6 +159,21 @@ export default function LandingPage() {
 
       if (response.ok) {
         console.log("Form submitted successfully");
+        // Trigger Brevo workflow API
+        try {
+          await fetch("/api/addContactToWorkflow", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: formData.email,
+              firstName: formData.name,
+              lastName: "", // Add if you collect last name
+              workflowId: process.env.NEXT_PUBLIC_BREVO_WORKFLOW_ID || "1"
+            }),
+          });
+        } catch (err) {
+          console.warn("Brevo workflow trigger failed", err);
+        }
         // Redirect to thank you page
         router.push("/thank-you?type=roadmap");
       } else {

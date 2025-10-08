@@ -22,7 +22,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const apiKey = process.env.BREVO_API_KEY;
+    // const apiKey = process.env.BREVO_API_KEY;
+      const apiKey = process.env.BREVO_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: "Server missing BREVO_API_KEY" }, { status: 500 });
     }
