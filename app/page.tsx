@@ -168,7 +168,7 @@ export default function LandingPage() {
               email: formData.email,
               firstName: formData.name,
               lastName: "", // Add if you collect last name
-              workflowId: process.env.NEXT_PUBLIC_BREVO_WORKFLOW_ID || "1"
+              workflowId: process.env.NEXT_PUBLIC_BREVO_WORKFLOW_ID || "2"
             }),
           });
         } catch (err) {
