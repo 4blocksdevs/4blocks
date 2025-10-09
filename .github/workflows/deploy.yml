@@ -132,7 +132,13 @@ jobs:
             if [ ! -d "public" ]; then echo "public folder missing on server"; exit 1; fi
             # Write runtime environment file with secrets (from step env)
             echo "Writing .env with BREVO_API_KEY..."
+            if [ -z "$BREVO_API_KEY" ]; then
+              echo "BREVO_API_KEY is empty or not set in secrets" >&2
+              exit 1
+            fi
             printf "BREVO_API_KEY=%s\n" "$BREVO_API_KEY" | sudo tee /var/www/4BlocksRoadmap/current/.env > /dev/null
+            # Restrict permissions on the .env file
+            sudo chmod 600 /var/www/4BlocksRoadmap/current/.env
             # Install dependencies
             npm ci --omit=dev
             npm audit fix || true # Address vulnerabilities
@@ -149,8 +155,7 @@ jobs:
               pm2 stop roadmap || true
               pm2 delete roadmap || true
             fi
-            # Start app (export secret so Next.js sees it at runtime)
-            export BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+            # Start app
             pm2 start npm --name "roadmap" -- run start -- -p 3002
             # Verify process
             sleep 3
