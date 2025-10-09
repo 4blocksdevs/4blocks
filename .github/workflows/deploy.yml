@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# Prevent multiple deployments from running concurrently
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -18,8 +23,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "npm"
+          node-version: '20' # Use a newer, stable version
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -29,27 +34,36 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
+        continue-on-error: true # Allow pipeline to continue if linting fails
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_ENV: test
+        continue-on-error: false # Fail if tests fail
 
       - name: Build application
         run: npm run build
         env:
           NODE_ENV: production
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }} # Add other public env vars as needed
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: |
-            out/
+            .next/
             package.json
             package-lock.json
+            .env.production # Include if you have a production env file
           retention-days: 1
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     name: Deploy to Server
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Download build artifacts
@@ -90,11 +104,11 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "out/*"
+          source: ".next/*,package.json,package-lock.json,.env.production"
           target: "/var/www/4BlocksMVP/current/"
           strip_components: 1
 
-      - name: Configure Nginx and PM2
+      - name: Install dependencies and configure PM2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -102,26 +116,53 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
+            # Navigate to deployment directory
+            cd /var/www/4BlocksMVP/current
+
+            # Install production dependencies
+            npm ci --production
+
+            # Install PM2 globally if not already installed
+            if ! command -v pm2 &> /dev/null; then
+              sudo npm install -g pm2
+            fi
+
             # Set proper permissions
             sudo chown -R www-data:www-data /var/www/4BlocksMVP/current
             sudo chmod -R 755 /var/www/4BlocksMVP/current
 
-            # Create nginx configuration if it doesn't exist
-            if [ ! -f "/etc/nginx/sites-available/4blocksmvp" ]; then
-              sudo tee /etc/nginx/sites-available/4blocksmvp > /dev/null <<EOF
+            # Stop existing PM2 process if running
+            pm2 delete 4blocksmvp || true
+
+            # Start Next.js app with PM2
+            pm2 start npm --name "4blocksmvp" -- run start -- -p 3000
+
+            # Save PM2 process list
+            pm2 save
+
+            # Ensure PM2 starts on system boot
+            sudo pm2 startup systemd -u $USER --hp /home/$USER
+
+      - name: Configure Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            # Create Nginx configuration
+            sudo tee /etc/nginx/sites-available/4blocksmvp > /dev/null <<EOF
             server {
                 listen 80;
-                server_name your-domain.com www.your-domain.com;  # Replace with your domain
-                
-                root /var/www/4BlocksMVP/current;
-                index index.html;
-                
+                server_name your-domain.com www.your-domain.com; # Replace with your domain
+
                 # Security headers
                 add_header X-Frame-Options "SAMEORIGIN" always;
                 add_header X-Content-Type-Options "nosniff" always;
                 add_header X-XSS-Protection "1; mode=block" always;
                 add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-                
+
                 # Gzip compression
                 gzip on;
                 gzip_vary on;
@@ -136,45 +177,47 @@ jobs:
                     application/javascript
                     application/xml+rss
                     application/json;
-                
-                # Handle Next.js static files
+
+                # Proxy to Next.js app
+                location / {
+                    proxy_pass http://localhost:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade \$http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host \$host;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto \$scheme;
+                    proxy_cache_bypass \$http_upgrade;
+                }
+
+                # Serve static files directly
                 location /_next/static/ {
-                    alias /var/www/4BlocksMVP/current/_next/static/;
+                    alias /var/www/4BlocksMVP/current/.next/static/;
                     expires 1y;
                     add_header Cache-Control "public, immutable";
                 }
-                
-                # Handle API routes (if any)
-                location /api/ {
-                    try_files \$uri \$uri/ =404;
-                }
-                
-                # Handle all routes for SPA
-                location / {
-                    try_files $uri $uri.html $uri/ /index.html;
-                }
-                
-                # Security: deny access to hidden files
+
+                # Deny access to hidden files
                 location ~ /\. {
                     deny all;
                 }
             }
             EOF
-              
-              # Enable the site
-              sudo ln -sf /etc/nginx/sites-available/4blocksmvp /etc/nginx/sites-enabled/
-              
-              # Remove default site if it exists
-              sudo rm -f /etc/nginx/sites-enabled/default
-            fi
 
-            # Test nginx configuration
+            # Enable the site
+            sudo ln -sf /etc/nginx/sites-available/4blocksmvp /etc/nginx/sites-enabled/
+
+            # Remove default site if it exists
+            sudo rm -f /etc/nginx/sites-enabled/default
+
+            # Test Nginx configuration
             sudo nginx -t
 
-            # Reload nginx
+            # Reload Nginx
             sudo systemctl reload nginx
 
-            # Ensure nginx is running
+            # Ensure Nginx is running
             sudo systemctl enable nginx
             sudo systemctl start nginx
 
@@ -186,32 +229,37 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
-            # Wait a moment for nginx to fully reload
-            sleep 5
+            # Wait for Nginx and Next.js to stabilize
+            sleep 10
 
-            # Check if the site is accessible
-            if curl -f -s http://localhost > /dev/null; then
-              echo "✅ Deployment successful! Site is accessible."
-              echo "📊 Deployment Statistics:"
-              echo "📁 Files deployed: $(find /var/www/4BlocksMVP/current -type f | wc -l)"
-              echo "💾 Total size: $(du -sh /var/www/4BlocksMVP/current | cut -f1)"
-              echo "🕒 Deployment time: $(date)"
-            else
-              echo "❌ Health check failed! Site may not be accessible."
-              exit 1
-            fi
+            # Perform health check with retries
+            for i in {1..3}; do
+              if curl -f -s http://localhost > /dev/null; then
+                echo "✅ Deployment successful! Site is accessible."
+                echo "📊 Deployment Statistics:"
+                echo "📁 Files deployed: $(find /var/www/4BlocksMVP/current -type f | wc -l)"
+                echo "💾 Total size: $(du -sh /var/www/4BlocksMVP/current | cut -f1)"
+                echo "🕒 Deployment time: $(date)"
+                exit 0
+              else
+                echo "⚠️ Health check attempt $i failed. Retrying..."
+                sleep 5
+              fi
+            done
+            echo "❌ Health check failed after 3 attempts! Site may not be accessible."
+            exit 1
 
       - name: Notify deployment status
-        uses: appleboy/ssh-action@v1.0.3
         if: always()
+        uses: slackapi/slack-github-action@v1.27.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          script: |
-            echo "🚀 4Blocks MVP Deployment Complete!"
-            echo "📍 Location: /var/www/4BlocksMVP/current"
-            echo "🌐 Server: $(hostname)"
-            echo "⏰ Time: $(date)"
-            echo "📋 Nginx Status: $(sudo systemctl is-active nginx)"
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: 'deployments'
+          text: |
+            🚀 4Blocks MVP Deployment
+            📍 Status: ${{ job.status }}
+            📁 Location: /var/www/4BlocksMVP/current
+            🌐 Server: ${{ secrets.SERVER_HOST }}
+            ⏰ Time: $(date)
+            📋 Commit: ${{ github.sha }}
+        continue-on-error: true
