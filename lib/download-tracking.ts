@@ -21,10 +21,12 @@ export function trackAndDownloadPDF({
     UniversalTracking.trackPDFDownload(inferredName, leadSource, downloadType);
 
     // Send UTM data to Brevo (if email is available in window or session)
-    let email = undefined;
+  let email: string | undefined = undefined;
     // Try to get email from global context, session, or prompt (customize as needed)
     if (typeof window !== "undefined") {
-      email = window.sessionStorage?.getItem("lead_email") || window.localStorage?.getItem("lead_email");
+  const sessionEmail = window.sessionStorage?.getItem("lead_email");
+  const localEmail = window.localStorage?.getItem("lead_email");
+  email = sessionEmail ?? localEmail ?? undefined;
     }
     if (email) {
       // Dynamically import to avoid SSR issues
@@ -34,7 +36,7 @@ export function trackAndDownloadPDF({
           const fn = mod.subscribeToBrevo || mod.default;
           if (typeof fn === "function") {
             fn({
-              email,
+              email: email ?? "",
               lead_source: leadSource,
               tags: [downloadType],
             });
