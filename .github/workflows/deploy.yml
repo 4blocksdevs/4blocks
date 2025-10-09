@@ -48,7 +48,7 @@ jobs:
         with:
           name: build-files
           path: |
-            .next/
+            .next
             package.json
             package-lock.json
             .env.production # Include if you have a production env file
@@ -136,7 +136,7 @@ jobs:
             pm2 save
 
             # Ensure PM2 starts on system boot
-            sudo pm2 startup systemd -u $USER --hp /home/$USER
+            sudo pm2 startup systemd -u ${{ secrets.SERVER_USER }} --hp /home/${{ secrets.SERVER_USER }}
 
       - name: Configure Nginx
         uses: appleboy/ssh-action@v1.0.3
