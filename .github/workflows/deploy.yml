@@ -92,7 +92,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
-          source: ".next/*,package.json,package-lock.json,app/*,public/*"
+          source: "*"
           target: "/var/www/4BlocksMVP/current/"
           strip_components: 0
 
