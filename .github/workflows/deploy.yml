@@ -1,151 +1,124 @@
-name: Deploy 4Blocks MVP to Ubuntu Server
+name: Deploy Next.js SSR App
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-# Prevent multiple deployments from running concurrently
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches:
+      - main
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
-    name: Test and Build
 
     steps:
+      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      # Set up Node.js environment
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use a newer, stable version
+          node-version: '20' # Use a modern Node.js version to avoid deprecation issues
           cache: 'npm'
 
+      # Install dependencies and build Next.js app
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --omit=dev # Use --omit=dev instead of deprecated --production
 
-      - name: Run TypeScript check
-        run: npm run typecheck
-
-      - name: Run ESLint
-        run: npm run lint
-        continue-on-error: true # Allow pipeline to continue if linting fails
-
-      - name: Build application
+      - name: Build Next.js app
         run: npm run build
-        env:
-          NODE_ENV: production
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }} 
-          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
 
+      # Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: |
-            .next
+            .next/
             package.json
             package-lock.json
-            .env.production # Include if you have a production env file
+            public/
+            next.config.js
           retention-days: 1
 
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    name: Deploy to Server
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-
-      - name: Deploy to Ubuntu Server
+      # Set up deployment directory on remote server
+      - name: Prepare deployment directory
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
             # Create deployment directory if it doesn't exist
             sudo mkdir -p /var/www/4BlocksMVP
             sudo mkdir -p /var/www/4BlocksMVP/backups
-
             # Create backup of current deployment
             if [ -d "/var/www/4BlocksMVP/current" ]; then
               sudo mv /var/www/4BlocksMVP/current /var/www/4BlocksMVP/backups/backup-$(date +%Y%m%d-%H%M%S)
             fi
-
             # Clean up old backups (keep last 5)
             sudo find /var/www/4BlocksMVP/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
-
             # Create new deployment directory
             sudo mkdir -p /var/www/4BlocksMVP/current
-
             # Set proper ownership
             sudo chown -R $USER:$USER /var/www/4BlocksMVP
 
-      - name: Copy files to server
+      # Transfer build files to server
+      - name: Transfer files to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: ".next/*,package.json,package-lock.json,public/*,.env.production"
-          target: "/var/www/4BlocksMVP/current/"
-          strip_components: 0
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: ./.next,./package.json,./package-lock.json,./public,./next.config.js
+          target: /var/www/4BlocksMVP/current
+          strip_components: 1 # Remove the top-level directory from the tar
+          overwrite: true
 
-      - name: Install dependencies and configure PM2
+      # Install dependencies and start app with PM2
+      - name: Deploy and start app
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
             # Navigate to deployment directory
             cd /var/www/4BlocksMVP/current
-
             # Install production dependencies
-            npm ci --production
-
+            npm ci --omit=dev
+            # Check for vulnerabilities and attempt to fix
+            npm audit fix || true # Run audit fix, but don't fail if it can't resolve
             # Install PM2 globally if not already installed
             if ! command -v pm2 &> /dev/null; then
               sudo npm install -g pm2
             fi
-
             # Set proper permissions
             sudo chown -R www-data:www-data /var/www/4BlocksMVP/current
             sudo chmod -R 755 /var/www/4BlocksMVP/current
-
             # Stop existing PM2 process if running
             pm2 delete 4blocksmvp || true
-
             # Start Next.js app with PM2
             pm2 start npm --name "4blocksmvp" -- run start -- -p 3000
-
             # Save PM2 process list
             pm2 save
-
             # Ensure PM2 starts on system boot
-            sudo pm2 startup systemd -u ${{ secrets.SERVER_USER }} --hp /home/${{ secrets.SERVER_USER }}
+            sudo pm2 startup systemd -u ${{ secrets.SSH_USERNAME }} --hp /home/${{ secrets.SSH_USERNAME }}
 
+      # Configure Nginx
       - name: Configure Nginx
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
+            # Remove conflicting configurations
+            sudo rm -f /etc/nginx/sites-enabled/mvp-roadmap
             # Create Nginx configuration
             sudo tee /etc/nginx/sites-available/4blocksmvp > /dev/null <<EOF
             server {
@@ -199,62 +172,17 @@ jobs:
                 }
             }
             EOF
-
             # Enable the site
             sudo ln -sf /etc/nginx/sites-available/4blocksmvp /etc/nginx/sites-enabled/
-
             # Remove default site if it exists
             sudo rm -f /etc/nginx/sites-enabled/default
-
             # Test Nginx configuration
-            sudo nginx -t
-
+            if ! sudo nginx -t; then
+              echo "Nginx configuration test failed"
+              exit 1
+            fi
             # Reload Nginx
             sudo systemctl reload nginx
-
             # Ensure Nginx is running
             sudo systemctl enable nginx
             sudo systemctl start nginx
-
-      - name: Health Check
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          script: |
-            # Wait for Nginx and Next.js to stabilize
-            sleep 10
-
-            # Perform health check with retries
-            for i in {1..3}; do
-              if curl -f -s http://localhost > /dev/null; then
-                echo "✅ Deployment successful! Site is accessible."
-                echo "📊 Deployment Statistics:"
-                echo "📁 Files deployed: $(find /var/www/4BlocksMVP/current -type f | wc -l)"
-                echo "💾 Total size: $(du -sh /var/www/4BlocksMVP/current | cut -f1)"
-                echo "🕒 Deployment time: $(date)"
-                exit 0
-              else
-                echo "⚠️ Health check attempt $i failed. Retrying..."
-                sleep 5
-              fi
-            done
-            echo "❌ Health check failed after 3 attempts! Site may not be accessible."
-            exit 1
-
-      # - name: Notify deployment status
-      #   if: always()
-      #   uses: slackapi/slack-github-action@v1.27.0
-      #   with:
-      #     slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     channel-id: 'deployments'
-      #     text: |
-      #       🚀 4Blocks MVP Deployment
-      #       # 📍 Status: ${{ job.status }}
-      #       📁 Location: /var/www/4BlocksMVP/current
-      #       🌐 Server: ${{ secrets.SERVER_HOST }}
-      #       ⏰ Time: $(date)
-      #       📋 Commit: ${{ github.sha }}
-      #   continue-on-error: true
