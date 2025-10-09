@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-
+export const dynamic = "force-dynamic";
 interface BrevoSubscribeBody {
   email: string;
   firstName?: string;
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const apiKey = process.env.BREVO_API_KEY;
     const defaultListId = process.env.BREVO_LIST_ID
       ? parseInt(process.env.BREVO_LIST_ID, 10)
-      : undefined;
+      : 2;
 
     if (!apiKey) {
       console.error("❌ Missing BREVO_API_KEY in environment variables.");
