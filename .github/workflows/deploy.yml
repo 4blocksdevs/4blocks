@@ -3,180 +3,175 @@ name: Deploy 4Blocks MVP to Ubuntu Server
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+
+env:
+  APP_NAME: 4blocks
+  APP_DIR: /var/www/4BlocksMVP/current
+  DOMAIN: ${{ secrets.DOMAIN }} # Added as a secret for domain configuration
+  NODE_ENV: production
 
 jobs:
-  test:
+  test_and_build:
+    name: 🧪 Test & Build Next.js App
     runs-on: ubuntu-latest
-    name: Test and Build
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "npm"
+          node-version: 18
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run TypeScript check
+      - name: Run type check
         run: npm run typecheck
 
-      - name: Run ESLint
+      - name: Run lint check
         run: npm run lint
 
-      - name: Build application
+      - name: Build Next.js app
         run: npm run build
         env:
-          NODE_ENV: production
+          NODE_ENV: ${{ env.NODE_ENV }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-files
+          name: next-build
           path: |
-            .next/
+            .next
             package.json
             package-lock.json
-          retention-days: 1
+            next.config.js
+            public
+          retention-days: 7 # Increased retention for debugging
 
   deploy:
-    needs: test
+    name: 🚀 Deploy to Ubuntu Server
+    needs: test_and_build
     runs-on: ubuntu-latest
-    name: Deploy to Server
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-files
+          name: next-build
 
-      - name: Deploy to Ubuntu Server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          script: |
-            # Create deployment directory if it doesn't exist
-            sudo mkdir -p /var/www/4BlocksMVP
-            sudo mkdir -p /var/www/4BlocksMVP/backups
-
-            # Create backup of current deployment
-            if [ -d "/var/www/4BlocksMVP/current" ]; then
-              sudo mv /var/www/4BlocksMVP/current /var/www/4BlocksMVP/backups/backup-$(date +%Y%m%d-%H%M%S)
-            fi
-
-            # Clean up old backups (keep last 5)
-            sudo find /var/www/4BlocksMVP/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
-
-            # Create new deployment directory
-            sudo mkdir -p /var/www/4BlocksMVP/current
-
-            # Set proper ownership
-            sudo chown -R $USER:$USER /var/www/4BlocksMVP
-
-      - name: Copy files to server
+      - name: Upload files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "out/*"
-          target: "/var/www/4BlocksMVP/current/"
-          strip_components: 1
+          port: ${{ secrets.SERVER_PORT }}
+          source: .
+          target: ${{ env.APP_DIR }}
+          overwrite: true
 
-      - name: Configure Nginx and PM2
+      - name: Configure environment
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          port: ${{ secrets.SERVER_PORT }}
           script: |
-            # Set proper permissions
-            sudo chown -R www-data:www-data /var/www/4BlocksMVP/current
-            sudo chmod -R 755 /var/www/4BlocksMVP/current
+            set -e
+            echo "🚀 Starting environment setup on $(hostname)"
 
-            # Create nginx configuration if it doesn't exist
-            if [ ! -f "/etc/nginx/sites-available/4blocksmvp" ]; then
-              sudo tee /etc/nginx/sites-available/4blocksmvp > /dev/null <<EOF
-            server {
-                listen 80;
-                server_name your-domain.com www.your-domain.com;  # Replace with your domain
-                
-                root /var/www/4BlocksMVP/current;
-                index index.html;
-                
-                # Security headers
-                add_header X-Frame-Options "SAMEORIGIN" always;
-                add_header X-Content-Type-Options "nosniff" always;
-                add_header X-XSS-Protection "1; mode=block" always;
-                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-                
-                # Gzip compression
-                gzip on;
-                gzip_vary on;
-                gzip_min_length 1000;
-                gzip_proxied any;
-                gzip_comp_level 6;
-                gzip_types
-                    text/plain
-                    text/css
-                    text/xml
-                    text/javascript
-                    application/javascript
-                    application/xml+rss
-                    application/json;
-                
-                # Handle Next.js static files
-                location /_next/static/ {
-                    alias /var/www/4BlocksMVP/current/_next/static/;
-                    expires 1y;
-                    add_header Cache-Control "public, immutable";
-                }
-                
-                # Handle API routes (if any)
-                location /api/ {
-                    try_files \$uri \$uri/ =404;
-                }
-                
-                # Handle all routes for SPA
-                location / {
-                    try_files $uri $uri.html $uri/ /index.html;
-                }
-                
-                # Security: deny access to hidden files
-                location ~ /\. {
-                    deny all;
-                }
-            }
+            # Ensure deployment directory exists with correct permissions
+            sudo mkdir -p ${{ env.APP_DIR }}
+            sudo chown -R $USER:$USER ${{ env.APP_DIR }}
+
+            # Write environment variables to .env file
+            cat << EOF | sudo tee ${{ env.APP_DIR }}/.env > /dev/null
+            NODE_ENV=${{ env.NODE_ENV }}
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
             EOF
-              
-              # Enable the site
-              sudo ln -sf /etc/nginx/sites-available/4blocksmvp /etc/nginx/sites-enabled/
-              
-              # Remove default site if it exists
-              sudo rm -f /etc/nginx/sites-enabled/default
+
+      - name: Install and start app
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            set -e
+            cd ${{ env.APP_DIR }}
+
+            # Install production dependencies
+            npm ci --omit=dev
+
+            # Install PM2 globally if not present
+            if ! command -v pm2 &>/dev/null; then
+              sudo npm install -g pm2
             fi
 
-            # Test nginx configuration
+            # Start or restart app with PM2
+            pm2 delete ${{ env.APP_NAME }} || true
+            pm2 start "npm start" --name "${{ env.APP_NAME }}"
+            pm2 save
+            pm2 startup systemd -u $USER --hp $HOME
+
+      - name: Configure Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            set -e
+            NGINX_CONF="/etc/nginx/sites-available/${{ env.APP_NAME }}"
+
+            # Write Nginx configuration
+            sudo bash -c "cat > $NGINX_CONF" << 'EOF'
+            server {
+                listen 80;
+                server_name ${{ env.DOMAIN }} www.${{ env.DOMAIN }};
+
+                location / {
+                    proxy_pass http://localhost:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host $host;
+                    proxy_cache_bypass $http_upgrade;
+                }
+
+                gzip on;
+                gzip_types text/plain text/css application/json application/javascript text/xml application/xml+rss;
+            }
+            EOF
+
+            # Enable and reload Nginx
+            sudo ln -sf /etc/nginx/sites-available/${{ env.APP_NAME }} /etc/nginx/sites-enabled/
+            sudo rm -f /etc/nginx/sites-enabled/default
             sudo nginx -t
-
-            # Reload nginx
             sudo systemctl reload nginx
-
-            # Ensure nginx is running
             sudo systemctl enable nginx
-            sudo systemctl start nginx
+
+      - name: Enable SSL (Optional)
+        if: ${{ secrets.ENABLE_SSL == 'true' }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            set -e
+            sudo apt-get update
+            sudo apt-get install -y certbot python3-certbot-nginx
+            sudo certbot --nginx -d ${{ env.DOMAIN }} -d www.${{ env.DOMAIN }} --non-interactive --agree-tos -m ${{ secrets.ADMIN_EMAIL }}
 
       - name: Health Check
         uses: appleboy/ssh-action@v1.0.3
@@ -184,34 +179,38 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          port: ${{ secrets.SERVER_PORT }}
           script: |
-            # Wait a moment for nginx to fully reload
+            set -e
+            echo "🔍 Running health check..."
             sleep 5
-
-            # Check if the site is accessible
-            if curl -f -s http://localhost > /dev/null; then
-              echo "✅ Deployment successful! Site is accessible."
-              echo "📊 Deployment Statistics:"
-              echo "📁 Files deployed: $(find /var/www/4BlocksMVP/current -type f | wc -l)"
-              echo "💾 Total size: $(du -sh /var/www/4BlocksMVP/current | cut -f1)"
-              echo "🕒 Deployment time: $(date)"
+            if curl -fs http://localhost:3000 > /dev/null; then
+              echo "✅ App is running successfully on port 3000."
             else
-              echo "❌ Health check failed! Site may not be accessible."
+              echo "❌ Health check failed! App not reachable."
               exit 1
             fi
 
-      - name: Notify deployment status
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Notify Slack on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: deployments
+          text: "🚨 Deployment of ${{ env.APP_NAME }} MVP failed on ${{ github.sha }}!"
+
+      - name: Deployment Summary
         if: always()
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          port: ${{ secrets.SERVER_PORT }}
           script: |
-            echo "🚀 4Blocks MVP Deployment Complete!"
-            echo "📍 Location: /var/www/4BlocksMVP/current"
-            echo "🌐 Server: $(hostname)"
-            echo "⏰ Time: $(date)"
-            echo "📋 Nginx Status: $(sudo systemctl is-active nginx)"
+            echo "📦 Deployment complete for ${{ env.APP_NAME }} MVP"
+            echo "📍 Path: ${{ env.APP_DIR }}"
+            echo "🕒 Time: $(date)"
+            echo "🌐 Nginx: $(sudo systemctl is-active nginx)"
+            echo "⚙️ PM2 Apps:"
+            pm2 list
