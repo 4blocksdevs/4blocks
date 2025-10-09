@@ -40,7 +40,8 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }} # Add other public env vars as needed
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }} 
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -149,7 +150,7 @@ jobs:
             sudo tee /etc/nginx/sites-available/4blocksmvp > /dev/null <<EOF
             server {
                 listen 80;
-                server_name your-domain.com www.your-domain.com; # Replace with your domain
+                server_name mvp-roadmap.4blocks.xyz www.mvp-roadmap.4blocks.xyz;
 
                 # Security headers
                 add_header X-Frame-Options "SAMEORIGIN" always;
@@ -251,7 +252,7 @@ jobs:
           channel-id: 'deployments'
           text: |
             🚀 4Blocks MVP Deployment
-            📍 Status: ${{ job.status }}
+            # 📍 Status: ${{ job.status }}
             📁 Location: /var/www/4BlocksMVP/current
             🌐 Server: ${{ secrets.SERVER_HOST }}
             ⏰ Time: $(date)
