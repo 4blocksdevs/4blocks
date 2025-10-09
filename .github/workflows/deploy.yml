@@ -114,11 +114,20 @@ jobs:
           script: |
             set -e
             echo "Deploying application..."
-            # Use system Node.js (assumed installed via actions/setup-node)
-            NODE_VERSION=$(node -v)
-            echo "Using Node.js $NODE_VERSION on server."
+            # Ensure Node.js is installed (install 22.x if missing)
+            if ! command -v node &> /dev/null; then
+              echo "Node.js not found. Installing Node.js 22.x..."
+              curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+            node -v || true
+            npm -v || true
             # Navigate to deployment directory
             cd /var/www/4BlocksRoadmap/current
+            # Verify required build files exist
+            if [ ! -d ".next" ]; then echo ".next folder missing on server"; ls -la; exit 1; fi
+            if [ ! -f "package.json" ]; then echo "package.json missing on server"; exit 1; fi
+            if [ ! -d "public" ]; then echo "public folder missing on server"; exit 1; fi
             # Install dependencies
             npm ci --omit=dev
             npm audit fix || true # Address vulnerabilities
@@ -176,6 +185,18 @@ jobs:
             echo "Configuring Nginx..."
             # Remove conflicting configurations
             sudo rm -f /etc/nginx/sites-enabled/roadmap
+            sudo rm -f /etc/nginx/sites-enabled/frontend
+            sudo rm -f /etc/nginx/sites-enabled/4blocksroadmap
+            sudo rm -f /etc/nginx/sites-enabled/4blocksmvp
+            # Proactively remove any other enabled configs that reference our domain
+            for f in /etc/nginx/sites-enabled/*; do
+              if [ -f "$f" ] && grep -q "mvp-roadmap\.4blocks\.xyz" "$f" && [ "$(basename "$f")" != "roadmap" ]; then
+                echo "Removing conflicting Nginx site: $f"
+                sudo rm -f "$f"
+              fi
+            done
+            echo "Enabled sites after cleanup:"
+            ls -l /etc/nginx/sites-enabled || true
             # Create Nginx configuration
             sudo tee /etc/nginx/sites-available/roadmap > /dev/null <<EOF
             server {
