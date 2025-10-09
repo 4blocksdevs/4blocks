@@ -1,7 +1,9 @@
-name: Deploy 4Blocks MVP to DigitalOcean
+name: Deploy 4Blocks MVP to Ubuntu Server
 
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
 
 jobs:
