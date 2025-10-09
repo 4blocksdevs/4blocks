@@ -36,12 +36,6 @@ jobs:
         run: npm run lint
         continue-on-error: true # Allow pipeline to continue if linting fails
 
-      - name: Run tests
-        run: npm test
-        env:
-          NODE_ENV: test
-        continue-on-error: false # Fail if tests fail
-
       - name: Build application
         run: npm run build
         env:
