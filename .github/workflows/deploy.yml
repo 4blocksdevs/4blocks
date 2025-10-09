@@ -1,14 +1,19 @@
-name: Deploy Next.js SSR App
+name: Deployment CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        node-version: [22.x]
+    env:
+      NPM_CONFIG_FUND: false # Disable npm fund messages
     steps:
       # Checkout the repository
       - name: Checkout code
@@ -18,15 +23,23 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use a modern Node.js version to avoid deprecation issues
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      # Install dependencies and build Next.js app
+      # Install dependencies and build
       - name: Install dependencies
-        run: npm ci --omit=dev # Use --omit=dev instead of deprecated --production
+        run: npm ci --omit=dev # Use --omit=dev for production dependencies
 
       - name: Build Next.js app
         run: npm run build
+
+      # Verify build
+      - name: Verify build
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Build failed: .next directory not found!"
+            exit 1
+          fi
 
       # Upload build artifacts
       - name: Upload build artifacts
@@ -41,86 +54,134 @@ jobs:
             next.config.js
           retention-days: 1
 
-      # Set up deployment directory on remote server
+      # Test SSH connection
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SSH_CICD_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          script: |
+            echo "SSH connection successful"
+
+      # Prepare deployment directory with backup
       - name: Prepare deployment directory
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SSH_CICD_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
           script: |
-            # Create deployment directory if it doesn't exist
-            sudo mkdir -p /var/www/4BlocksMVP
-            sudo mkdir -p /var/www/4BlocksMVP/backups
-            # Create backup of current deployment
-            if [ -d "/var/www/4BlocksMVP/current" ]; then
-              sudo mv /var/www/4BlocksMVP/current /var/www/4BlocksMVP/backups/backup-$(date +%Y%m%d-%H%M%S)
+            set -e
+            echo "Preparing deployment directory..."
+            # Create directories
+            sudo mkdir -p /var/www/FrontendWebApp
+            sudo mkdir -p /var/www/FrontendWebApp/backups
+            # Backup current deployment
+            if [ -d "/var/www/FrontendWebApp/current" ]; then
+              sudo mv /var/www/FrontendWebApp/current /var/www/FrontendWebApp/backups/backup-$(date +%Y%m%d-%H%M%S)
             fi
             # Clean up old backups (keep last 5)
-            sudo find /var/www/4BlocksMVP/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
+            sudo find /var/www/FrontendWebApp/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
             # Create new deployment directory
-            sudo mkdir -p /var/www/4BlocksMVP/current
-            # Set proper ownership
-            sudo chown -R $USER:$USER /var/www/4BlocksMVP
+            sudo mkdir -p /var/www/FrontendWebApp/current
+            # Set ownership
+            sudo chown -R $USER:$USER /var/www/FrontendWebApp
 
-      # Transfer build files to server
-      - name: Transfer files to server
+      # Transfer files to server
+      - name: Transfer files
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SSH_CICD_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
           source: ./.next,./package.json,./package-lock.json,./public,./next.config.js
-          target: /var/www/4BlocksMVP/current
-          strip_components: 1 # Remove the top-level directory from the tar
+          target: /var/www/FrontendWebApp/current
+          strip_components: 1
           overwrite: true
 
-      # Install dependencies and start app with PM2
+      # Deploy and start app
       - name: Deploy and start app
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SSH_CICD_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
           script: |
+            set -e
+            echo "Deploying application..."
+            # Load NVM
+            export NVM_DIR=$HOME/.nvm
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            # Set Node.js version
+            nvm install 22.13.1
+            nvm use 22.13.1
+            export PATH=$NVM_DIR/versions/node/v22.13.1/bin:$PATH
             # Navigate to deployment directory
-            cd /var/www/4BlocksMVP/current
-            # Install production dependencies
+            cd /var/www/FrontendWebApp/current
+            # Install dependencies
             npm ci --omit=dev
-            # Check for vulnerabilities and attempt to fix
-            npm audit fix || true # Run audit fix, but don't fail if it can't resolve
-            # Install PM2 globally if not already installed
+            npm audit fix || true # Address vulnerabilities
+            # Install PM2 if not present
             if ! command -v pm2 &> /dev/null; then
-              sudo npm install -g pm2
+              npm install -g pm2
             fi
-            # Set proper permissions
-            sudo chown -R www-data:www-data /var/www/4BlocksMVP/current
-            sudo chmod -R 755 /var/www/4BlocksMVP/current
-            # Stop existing PM2 process if running
-            pm2 delete 4blocksmvp || true
-            # Start Next.js app with PM2
-            pm2 start npm --name "4blocksmvp" -- run start -- -p 3000
-            # Save PM2 process list
+            export PATH=$HOME/.npm-global/bin:$PATH
+            # Set permissions
+            sudo chown -R www-data:www-data /var/www/FrontendWebApp/current
+            sudo chmod -R 755 /var/www/FrontendWebApp/current
+            # Stop and delete existing process
+            if pm2 list | grep -q 'frontend'; then
+              pm2 stop frontend || true
+              pm2 delete frontend || true
+            fi
+            # Start app
+            pm2 start npm --name "frontend" -- run start -- -p 3002
+            # Verify process
+            sleep 3
+            if ! pm2 list | grep -q 'frontend.*online'; then
+              echo "Frontend process failed to start"
+              pm2 logs frontend --lines 10
+              exit 1
+            fi
+            # Save PM2 configuration
             pm2 save
-            # Ensure PM2 starts on system boot
-            sudo pm2 startup systemd -u ${{ secrets.SERVER_USER }} --hp /home/${{ secrets.SERVER_USER }}
+            pm2 startup systemd -u $USER --hp $HOME
+            # Health check
+            for i in {1..15}; do
+              if curl -f http://localhost:3002 >/dev/null 2>&1; then
+                echo "Application is responding on port 3002"
+                break
+              fi
+              if [ $i -eq 15 ]; then
+                echo "Health check failed after 15 attempts"
+                pm2 logs frontend --lines 20
+                exit 1
+              fi
+              echo "Waiting for application... attempt $i/15"
+              sleep 2
+            done
+            echo "Deployment completed successfully"
 
       # Configure Nginx
       - name: Configure Nginx
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SSH_CICD_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
           script: |
+            set -e
+            echo "Configuring Nginx..."
             # Remove conflicting configurations
-            sudo rm -f /etc/nginx/sites-enabled/mvp-roadmap
+            sudo rm -f /etc/nginx/sites-enabled/frontend
             # Create Nginx configuration
-            sudo tee /etc/nginx/sites-available/4blocksmvp > /dev/null <<EOF
+            sudo tee /etc/nginx/sites-available/frontend > /dev/null <<EOF
             server {
                 listen 80;
                 server_name mvp-roadmap.4blocks.xyz www.mvp-roadmap.4blocks.xyz;
@@ -148,7 +209,7 @@ jobs:
 
                 # Proxy to Next.js app
                 location / {
-                    proxy_pass http://localhost:3001;
+                    proxy_pass http://localhost:3002;
                     proxy_http_version 1.1;
                     proxy_set_header Upgrade \$http_upgrade;
                     proxy_set_header Connection "upgrade";
@@ -159,30 +220,30 @@ jobs:
                     proxy_cache_bypass \$http_upgrade;
                 }
 
-                # Serve static files directly
+                # Serve static files
                 location /_next/static/ {
-                    alias /var/www/4BlocksMVP/current/.next/static/;
+                    alias /var/www/FrontendWebApp/current/.next/static/;
                     expires 1y;
                     add_header Cache-Control "public, immutable";
                 }
 
-                # Deny access to hidden files
+                # Deny hidden files
                 location ~ /\. {
                     deny all;
                 }
             }
             EOF
-            # Enable the site
-            sudo ln -sf /etc/nginx/sites-available/4blocksmvp /etc/nginx/sites-enabled/
-            # Remove default site if it exists
+            # Enable site
+            sudo ln -sf /etc/nginx/sites-available/frontend /etc/nginx/sites-enabled/
+            # Remove default site
             sudo rm -f /etc/nginx/sites-enabled/default
             # Test Nginx configuration
             if ! sudo nginx -t; then
               echo "Nginx configuration test failed"
               exit 1
             fi
-            # Reload Nginx
+            # Reload and enable Nginx
             sudo systemctl reload nginx
-            # Ensure Nginx is running
             sudo systemctl enable nginx
             sudo systemctl start nginx
+            echo "Nginx configured successfully"
