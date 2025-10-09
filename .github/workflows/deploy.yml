@@ -45,10 +45,10 @@ jobs:
       - name: Prepare deployment directory
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
           script: |
             # Create deployment directory if it doesn't exist
             sudo mkdir -p /var/www/4BlocksMVP
@@ -68,10 +68,10 @@ jobs:
       - name: Transfer files to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
           source: ./.next,./package.json,./package-lock.json,./public,./next.config.js
           target: /var/www/4BlocksMVP/current
           strip_components: 1 # Remove the top-level directory from the tar
@@ -81,10 +81,10 @@ jobs:
       - name: Deploy and start app
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
           script: |
             # Navigate to deployment directory
             cd /var/www/4BlocksMVP/current
@@ -106,16 +106,16 @@ jobs:
             # Save PM2 process list
             pm2 save
             # Ensure PM2 starts on system boot
-            sudo pm2 startup systemd -u ${{ secrets.SSH_USERNAME }} --hp /home/${{ secrets.SSH_USERNAME }}
+            sudo pm2 startup systemd -u ${{ secrets.SERVER_USERNAME }} --hp /home/${{ secrets.SERVER_USERNAME }}
 
       # Configure Nginx
       - name: Configure Nginx
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
           script: |
             # Remove conflicting configurations
             sudo rm -f /etc/nginx/sites-enabled/mvp-roadmap
