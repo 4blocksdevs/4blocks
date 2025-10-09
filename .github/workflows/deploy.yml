@@ -106,6 +106,8 @@ jobs:
       # Deploy and start app
       - name: Deploy and start app
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -128,6 +130,9 @@ jobs:
             if [ ! -d ".next" ]; then echo ".next folder missing on server"; ls -la; exit 1; fi
             if [ ! -f "package.json" ]; then echo "package.json missing on server"; exit 1; fi
             if [ ! -d "public" ]; then echo "public folder missing on server"; exit 1; fi
+            # Write runtime environment file with secrets (from step env)
+            echo "Writing .env with BREVO_API_KEY..."
+            printf "BREVO_API_KEY=%s\n" "$BREVO_API_KEY" | sudo tee /var/www/4BlocksRoadmap/current/.env > /dev/null
             # Install dependencies
             npm ci --omit=dev
             npm audit fix || true # Address vulnerabilities
@@ -144,7 +149,8 @@ jobs:
               pm2 stop roadmap || true
               pm2 delete roadmap || true
             fi
-            # Start app
+            # Start app (export secret so Next.js sees it at runtime)
+            export BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
             pm2 start npm --name "roadmap" -- run start -- -p 3002
             # Verify process
             sleep 3
