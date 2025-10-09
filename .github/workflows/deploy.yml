@@ -114,13 +114,9 @@ jobs:
           script: |
             set -e
             echo "Deploying application..."
-            # Load NVM
-            export NVM_DIR=$HOME/.nvm
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            # Set Node.js version
-            nvm install 22.13.1
-            nvm use 22.13.1
-            export PATH=$NVM_DIR/versions/node/v22.13.1/bin:$PATH
+            # Use system Node.js (assumed installed via actions/setup-node)
+            NODE_VERSION=$(node -v)
+            echo "Using Node.js $NODE_VERSION on server."
             # Navigate to deployment directory
             cd /var/www/4BlocksRoadmap/current
             # Install dependencies
