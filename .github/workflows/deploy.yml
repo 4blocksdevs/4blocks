@@ -58,10 +58,10 @@ jobs:
       - name: Test SSH Connection
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST_NAME }}
-          username: ${{ secrets.USER_NAME }}
-          key: ${{ secrets.SSH_CICD_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
             echo "SSH connection successful"
 
@@ -69,37 +69,37 @@ jobs:
       - name: Prepare deployment directory
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST_NAME }}
-          username: ${{ secrets.USER_NAME }}
-          key: ${{ secrets.SSH_CICD_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
             set -e
             echo "Preparing deployment directory..."
             # Create directories
-            sudo mkdir -p /var/www/FrontendWebApp
-            sudo mkdir -p /var/www/FrontendWebApp/backups
+            sudo mkdir -p /var/www/4BlocksRoadmap
+            sudo mkdir -p /var/www/4BlocksRoadmap/backups
             # Backup current deployment
-            if [ -d "/var/www/FrontendWebApp/current" ]; then
-              sudo mv /var/www/FrontendWebApp/current /var/www/FrontendWebApp/backups/backup-$(date +%Y%m%d-%H%M%S)
+            if [ -d "/var/www/4BlocksRoadmap/current" ]; then
+              sudo mv /var/www/4BlocksRoadmap/current /var/www/4BlocksRoadmap/backups/backup-$(date +%Y%m%d-%H%M%S)
             fi
             # Clean up old backups (keep last 5)
-            sudo find /var/www/FrontendWebApp/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
+            sudo find /var/www/4BlocksRoadmap/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
             # Create new deployment directory
-            sudo mkdir -p /var/www/FrontendWebApp/current
+            sudo mkdir -p /var/www/4BlocksRoadmap/current
             # Set ownership
-            sudo chown -R $USER:$USER /var/www/FrontendWebApp
+            sudo chown -R $USER:$USER /var/www/4BlocksRoadmap
 
       # Transfer files to server
       - name: Transfer files
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOST_NAME }}
-          username: ${{ secrets.USER_NAME }}
-          key: ${{ secrets.SSH_CICD_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
           source: ./.next,./package.json,./package-lock.json,./public,./next.config.js
-          target: /var/www/FrontendWebApp/current
+          target: /var/www/4BlocksRoadmap/current
           strip_components: 1
           overwrite: true
 
@@ -107,10 +107,10 @@ jobs:
       - name: Deploy and start app
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST_NAME }}
-          username: ${{ secrets.USER_NAME }}
-          key: ${{ secrets.SSH_CICD_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
             set -e
             echo "Deploying application..."
@@ -122,7 +122,7 @@ jobs:
             nvm use 22.13.1
             export PATH=$NVM_DIR/versions/node/v22.13.1/bin:$PATH
             # Navigate to deployment directory
-            cd /var/www/FrontendWebApp/current
+            cd /var/www/4BlocksRoadmap/current
             # Install dependencies
             npm ci --omit=dev
             npm audit fix || true # Address vulnerabilities
@@ -132,20 +132,20 @@ jobs:
             fi
             export PATH=$HOME/.npm-global/bin:$PATH
             # Set permissions
-            sudo chown -R www-data:www-data /var/www/FrontendWebApp/current
-            sudo chmod -R 755 /var/www/FrontendWebApp/current
+            sudo chown -R www-data:www-data /var/www/4BlocksRoadmap/current
+            sudo chmod -R 755 /var/www/4BlocksRoadmap/current
             # Stop and delete existing process
-            if pm2 list | grep -q 'frontend'; then
-              pm2 stop frontend || true
-              pm2 delete frontend || true
+            if pm2 list | grep -q 'roadmap'; then
+              pm2 stop roadmap || true
+              pm2 delete roadmap || true
             fi
             # Start app
-            pm2 start npm --name "frontend" -- run start -- -p 3002
+            pm2 start npm --name "roadmap" -- run start -- -p 3002
             # Verify process
             sleep 3
-            if ! pm2 list | grep -q 'frontend.*online'; then
+            if ! pm2 list | grep -q 'roadmap.*online'; then
               echo "Frontend process failed to start"
-              pm2 logs frontend --lines 10
+              pm2 logs roadmap --lines 10
               exit 1
             fi
             # Save PM2 configuration
@@ -159,7 +159,7 @@ jobs:
               fi
               if [ $i -eq 15 ]; then
                 echo "Health check failed after 15 attempts"
-                pm2 logs frontend --lines 20
+                pm2 logs roadmap --lines 20
                 exit 1
               fi
               echo "Waiting for application... attempt $i/15"
@@ -171,17 +171,17 @@ jobs:
       - name: Configure Nginx
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST_NAME }}
-          username: ${{ secrets.USER_NAME }}
-          key: ${{ secrets.SSH_CICD_KEY }}
-          port: ${{ secrets.SSH_PORT || '22' }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
             set -e
             echo "Configuring Nginx..."
             # Remove conflicting configurations
-            sudo rm -f /etc/nginx/sites-enabled/frontend
+            sudo rm -f /etc/nginx/sites-enabled/roadmap
             # Create Nginx configuration
-            sudo tee /etc/nginx/sites-available/frontend > /dev/null <<EOF
+            sudo tee /etc/nginx/sites-available/roadmap > /dev/null <<EOF
             server {
                 listen 80;
                 server_name mvp-roadmap.4blocks.xyz www.mvp-roadmap.4blocks.xyz;
@@ -222,7 +222,7 @@ jobs:
 
                 # Serve static files
                 location /_next/static/ {
-                    alias /var/www/FrontendWebApp/current/.next/static/;
+                    alias /var/www/4BlocksRoadmap/current/.next/static/;
                     expires 1y;
                     add_header Cache-Control "public, immutable";
                 }
@@ -234,7 +234,7 @@ jobs:
             }
             EOF
             # Enable site
-            sudo ln -sf /etc/nginx/sites-available/frontend /etc/nginx/sites-enabled/
+            sudo ln -sf /etc/nginx/sites-available/roadmap /etc/nginx/sites-enabled/
             # Remove default site
             sudo rm -f /etc/nginx/sites-enabled/default
             # Test Nginx configuration
