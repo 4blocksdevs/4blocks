@@ -113,6 +113,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || '22' }}
+          envs: BREVO_API_KEY
           script: |
             set -e
             echo "Deploying application..."
@@ -139,6 +140,9 @@ jobs:
             printf "BREVO_API_KEY=%s\n" "$BREVO_API_KEY" | sudo tee /var/www/4BlocksRoadmap/current/.env > /dev/null
             # Restrict permissions on the .env file
             sudo chmod 600 /var/www/4BlocksRoadmap/current/.env
+            # Basic sanity check without leaking secret
+            echo ".env created:"; sudo ls -l /var/www/4BlocksRoadmap/current/.env
+            echo "Line count (should be 1):"; sudo sh -c 'wc -l /var/www/4BlocksRoadmap/current/.env'
             # Install dependencies
             npm ci --omit=dev
             npm audit fix || true # Address vulnerabilities
@@ -149,11 +153,22 @@ jobs:
             export PATH=$HOME/.npm-global/bin:$PATH
             # Set permissions
             sudo chown -R www-data:www-data /var/www/4BlocksRoadmap/current
+            # Ensure the PM2 user can read .env (Next.js reads it on start)
+            sudo chown $USER:$USER /var/www/4BlocksRoadmap/current/.env
             sudo chmod -R 755 /var/www/4BlocksRoadmap/current
             # Stop and delete existing process
             if pm2 list | grep -q 'roadmap'; then
               pm2 stop roadmap || true
               pm2 delete roadmap || true
+            fi
+            # Load .env into this shell so PM2 child inherits runtime env
+            set -a
+            . /var/www/4BlocksRoadmap/current/.env
+            set +a
+            # Verify runtime env is loaded (do not print the value)
+            if [ -z "$BREVO_API_KEY" ]; then
+              echo "Runtime env missing BREVO_API_KEY after sourcing .env" >&2
+              exit 1
             fi
             # Start app
             pm2 start npm --name "roadmap" -- run start -- -p 3002
