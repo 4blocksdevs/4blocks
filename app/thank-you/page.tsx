@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,16 @@ export default function ThankYouPage() {
 
   const [email, setEmail] = useState("");
   const [formData, setFormData] = useState(initialFormData);
+  const [calendlyUrl, setCalendlyUrl] = useState<string>(
+    "https://calendly.com/4blocksdevs/30min?primary_color=9ED95D"
+  );
+
+  const baseCalendly = useMemo(() => {
+    return (
+      process.env.NEXT_PUBLIC_CALENDLY_URL ||
+      "https://calendly.com/4blocksdevs/30min"
+    );
+  }, []);
 
   useEffect(() => {
     // Initialize Universal Tracking
@@ -44,6 +55,30 @@ export default function ThankYouPage() {
       page_title: "Thank You - MVP Roadmap",
     });
   }, []);
+
+  // Build Calendly URL with UTMs from current URL
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const loc = new URL(window.location.href);
+    const params = new URLSearchParams();
+    // preserve existing primary color
+    params.set("primary_color", "9ED95D");
+    // Copy UTM parameters if present
+    [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term",
+      "utm_id",
+    ].forEach((k) => {
+      const v = loc.searchParams.get(k);
+      if (v) params.set(k, v);
+    });
+
+    const query = params.toString();
+    setCalendlyUrl(`${baseCalendly}${query ? `?${query}` : ""}`);
+  }, [baseCalendly]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -121,15 +156,9 @@ export default function ThankYouPage() {
       window.Calendly &&
       typeof window.Calendly.initPopupWidget === "function"
     ) {
-      window.Calendly.initPopupWidget({
-        url: "https://calendly.com/4blocksdevs/30min",
-      });
+      window.Calendly.initPopupWidget({ url: calendlyUrl });
     } else {
-      window.open(
-        "https://calendly.com/4blocksdevs/30min",
-        "_blank",
-        "noopener,noreferrer"
-      );
+      window.open(calendlyUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -146,6 +175,10 @@ export default function ThankYouPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/** Track Calendly bookings via postMessage */}
+      {dynamic(() => import("@/components/CalendlyThankYouTracker"), {
+        ssr: false,
+      })()}
       <link
         rel="stylesheet"
         href="https://assets.calendly.com/assets/external/widget.css"
@@ -408,7 +441,7 @@ export default function ThankYouPage() {
                   <div className="flex justify-center items-center w-full">
                     {/* Calendly Inline Widget - more sizeable and responsive */}
                     <iframe
-                      src="https://calendly.com/4blocksdevs/30min?primary_color=9ED95D"
+                      src={calendlyUrl}
                       width="90%"
                       height="500"
                       frameBorder="0"
