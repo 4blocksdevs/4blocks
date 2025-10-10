@@ -176,8 +176,13 @@ export default function ThankYouPage() {
   return (
     <div className="min-h-screen bg-white">
       {/** Track Calendly bookings via postMessage */}
-      {dynamic(() => import("@/components/CalendlyThankYouTracker"), {
-        ssr: false,
+      {/* CalendlyThankYouTracker dynamic import as a component */}
+      {(() => {
+        const CalendlyThankYouTracker = dynamic(
+          () => import("@/components/CalendlyThankYouTracker"),
+          { ssr: false }
+        );
+        return <CalendlyThankYouTracker />;
       })()}
       <link
         rel="stylesheet"
