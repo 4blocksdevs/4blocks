@@ -228,9 +228,9 @@ export default function ThankYouPage() {
             id="roadmapDownloadButton"
             type="button"
             onClick={handleRoadmapDownload}
-            className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 text-base"
+            className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 uppercase text-base"
           >
-            DOWNLOAD MVP ROADMAP
+            DOWNLOAD {type === "checklist" ? " Founder's MVP Checklist" : "MVP ROADMAP"} PDF
           </Button>
         </div>
       </section>
