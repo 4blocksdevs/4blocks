@@ -6,6 +6,8 @@ import Script from "next/script";
 import Footer from "../components/footer";
 import Image from "next/image";
 import TrackingInitializer from "../components/TrackingInitializer";
+import PDFDownloadTracker from "../components/PDFDownloadTracker";
+import BrevoTracking from "../components/BrevoTracking";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
   verification: {
-    google: "your-google-verification-code", // Add your Google Search Console verification
+    google: "your-google-verification-code", 
   },
 };
 
@@ -68,16 +70,16 @@ export default function RootLayout({
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GTM_ID}');`,
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5N39QMDC');`,
           }}
         />
 
-        {/* Google Analytics 4 */}
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+        {/*Google Analytics 4 */}
+         <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=G-CC9W51TKC8`}
           strategy="afterInteractive"
         />
         <Script
@@ -155,7 +157,7 @@ export default function RootLayout({
         {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
-            src={`https://www.googletagmanager.com/ns.html?id=${process.env.NEXT_PUBLIC_GTM_ID}`}
+            src={`https://www.googletagmanager.com/ns.html?id=GTM-5N39QMDC`}
             height="0"
             width="0"
             style={{ display: "none", visibility: "hidden" }}
@@ -168,7 +170,9 @@ export default function RootLayout({
               `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1" alt="" />`,
           }}
         />
-        <TrackingInitializer />
+  <TrackingInitializer />
+  <PDFDownloadTracker />
+  <BrevoTracking />
         <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
           <header className="container mx-auto px-4 py-6">

@@ -112,7 +112,8 @@ class HubSpotTracker {
 
     window.hbspt.forms.create({
       portalId: this.portalId,
-      formId: this.form2Id,
+      // Use the same form id as Form 1 so both forms map to the same HubSpot contact list
+      formId: this.form1Id,
       target: `#${targetElementId}`,
       onFormReady: (form) => {
         console.log("HubSpot Form 2 ready");
@@ -139,8 +140,10 @@ class HubSpotTracker {
       onFormSubmitted: (form) => {
         console.log("Form 2 submitted successfully");
 
-        // Trigger PDF download
-        this.triggerPDFDownload();
+        // Redirect to thank you page instead of triggering a download
+        setTimeout(() => {
+          window.location.href = "/thank-you";
+        }, 800);
       },
     });
   }
@@ -265,30 +268,20 @@ class HubSpotTracker {
 
   // Trigger PDF download
   private triggerPDFDownload(): void {
-    // Track download event
-    if (window.fbq) {
-      window.fbq("track", "DownloadPDF", {
-        content_name: "MVP Roadmap PDF",
-        content_type: "product",
-        pdf_type: "roadmap",
+    // Use centralized download tracking helper (dynamic import to reduce bundle)
+    import("./download-tracking")
+      .then(({ trackAndDownloadPDF }) => {
+        trackAndDownloadPDF({
+          filePath: "/mvp-roadmap.pdf",
+          fileName: "MVP-Roadmap-4Blocks.pdf",
+          leadSource: "hubspot_triggered_pdf",
+          downloadType: "mvp_roadmap",
+          autoClick: true,
+        });
+      })
+      .catch((err) => {
+        console.warn("Failed to load download-tracking helper", err);
       });
-    }
-
-    if (window.gtag) {
-      window.gtag("event", "file_download", {
-        event_category: "PDF",
-        event_label: "MVP Roadmap Download",
-        file_name: "mvp-roadmap.pdf",
-      });
-    }
-
-    // Create download link
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf";
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   }
 }
 

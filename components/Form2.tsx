@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { initializeHubSpot, type LeadData } from "@/lib/hubspot";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
+import trackAndDownloadPDF from "@/lib/download-tracking";
 import { trackingConfig, leadSources } from "@/lib/enhanced-tracking-config";
+import { subscribeToBrevo } from "@/lib/brevo-client";
 import { Download } from "lucide-react";
 
 interface Form2Props {
@@ -68,12 +70,15 @@ export default function Form2({
     try {
       // Get attribution data
       const attribution = UTMTracker.getAttributionForHubSpot();
+      const utm = UTMTracker.getAttribution() || {};
+      const utmGA = UTMTracker.getAttributionForGA() || {};
 
       // Prepare lead data with hidden fields
       const leadData: LeadData = {
         name: formData.name,
         email: formData.email,
-        form_type: "Form 2",
+        // Submit to the same HubSpot form as the hero (use Form 1 submission)
+        form_type: "Form 1",
         // Hidden fields as per funnel plan
         lead_source: leadSources.cta_form,
         ...attribution,
@@ -86,6 +91,21 @@ export default function Form2({
         leadData
       );
 
+      // Google Analytics event with standard UTM fields
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "lead", {
+          event_category: "engagement",
+          event_label: "MVP Roadmap Download CTA",
+          value: 1,
+          utm_source: utm.utm_source,
+          utm_medium: utm.utm_medium,
+          utm_campaign: utm.utm_campaign,
+          utm_content: utm.utm_content,
+          utm_term: utm.utm_term,
+          ...utmGA,
+        });
+      }
+
       // Submit to HubSpot
       const hubspot = initializeHubSpot(
         trackingConfig.hubspot.portalId,
@@ -93,7 +113,17 @@ export default function Form2({
         trackingConfig.hubspot.form2Id
       );
 
-      const success = await hubspot.submitLead(leadData);
+      const [hubspotOk, brevoOk] = await Promise.all([
+        hubspot.submitLead(leadData),
+        subscribeToBrevo({
+          email: formData.email,
+          firstName: formData.name,
+          lead_source: leadSources.cta_form,
+          tags: ["mvp_roadmap"],
+        }),
+      ]);
+
+      const success = hubspotOk;
 
       if (success) {
         // Track successful conversion
@@ -101,19 +131,23 @@ export default function Form2({
           email: formData.email,
         });
 
-        // Trigger PDF download
-        triggerPDFDownload();
-
         // Call success callback
         onSubmissionSuccess?.();
+
+        // Redirect to thank you page (do not download PDF here)
+        if (typeof window !== "undefined") {
+          window.location.href = "/thank-you?type=roadmap";
+        }
       } else {
         throw new Error("HubSpot submission failed");
       }
     } catch (error) {
       console.error("Form submission error:", error);
 
-      // Even on error, trigger download for better UX
-      triggerPDFDownload();
+      // On error, still redirect to thank-you for consistent UX
+      if (typeof window !== "undefined") {
+        window.location.href = "/thank-you?type=roadmap";
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -125,20 +159,13 @@ export default function Form2({
   };
 
   const triggerPDFDownload = () => {
-    // Track download event with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      leadSources.cta_form,
-      "mvp_roadmap"
-    );
-
-    // Create and trigger download
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf";
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    trackAndDownloadPDF({
+      filePath: "/mvp-roadmap.pdf",
+      fileName: "MVP-Roadmap-4Blocks.pdf",
+      leadSource: leadSources.cta_form,
+      downloadType: "mvp_roadmap",
+      autoClick: true,
+    });
   };
 
   // If HubSpot embed is working, show the embedded form

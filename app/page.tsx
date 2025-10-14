@@ -14,6 +14,7 @@ import Form2 from "@/components/Form2";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
 import { trackingEvents } from "@/lib/tracking-config";
+import trackAndDownloadPDF from "@/lib/download-tracking";
 
 declare global {
   interface Window {
@@ -74,21 +75,23 @@ export default function LandingPage() {
     };
 
     const downloadHandler = () => {
-      // Track download with Universal Tracking
-      UniversalTracking.trackPDFDownload(
-        "MVP-Roadmap-4Blocks.pdf",
-        "main_page_bottom_form",
-        "mvp_roadmap"
-      );
+      trackAndDownloadPDF({
+        filePath: "/mvp-roadmap.pdf",
+        fileName: "MVP-Roadmap-4Blocks.pdf",
+        leadSource: "main_page_bottom_form",
+        downloadType: "mvp_roadmap",
+        autoClick: false,
+      });
     };
 
     const pdfDownloadHandler = () => {
-      // Track PDF download with Universal Tracking
-      UniversalTracking.trackPDFDownload(
-        "MVP-Roadmap-4Blocks.pdf",
-        "main_page_pdf_button",
-        "mvp_roadmap"
-      );
+      trackAndDownloadPDF({
+        filePath: "/mvp-roadmap.pdf",
+        fileName: "MVP-Roadmap-4Blocks.pdf",
+        leadSource: "main_page_pdf_button",
+        downloadType: "mvp_roadmap",
+        autoClick: false,
+      });
     };
 
     mainForm?.addEventListener("submit", leadHandler);
@@ -109,6 +112,10 @@ export default function LandingPage() {
     try {
       // Track lead event
       if (typeof window !== "undefined") {
+        // Store email for attribution/tracking
+        if (formData.email) {
+          window.localStorage.setItem("lead_email", formData.email);
+        }
         if (window.gtag) {
           window.gtag("event", "Lead", {
             event_category: "engagement",
@@ -130,7 +137,7 @@ export default function LandingPage() {
       console.log("HubSpot Portal ID:", process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID);
       console.log("HubSpot Form ID:", process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID);
 
-  const hubspotUrl = `https://forms.hubspot.com/uploads/form/v2/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID}`;
+      const hubspotUrl = `https://forms.hubspot.com/uploads/form/v2/${process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID}/${process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID}`;
       console.log("HubSpot URL:", hubspotUrl);
 
       const formBody = new URLSearchParams({
@@ -152,6 +159,21 @@ export default function LandingPage() {
 
       if (response.ok) {
         console.log("Form submitted successfully");
+        // Trigger Brevo workflow API
+        try {
+          await fetch("/api/addContactToWorkflow", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: formData.email,
+              firstName: formData.name,
+              lastName: "", // Add if you collect last name
+              workflowId: process.env.NEXT_PUBLIC_BREVO_WORKFLOW_ID || "2"
+            }),
+          });
+        } catch (err) {
+          console.warn("Brevo workflow trigger failed", err);
+        }
         // Redirect to thank you page
         router.push("/thank-you?type=roadmap");
       } else {
@@ -161,12 +183,10 @@ export default function LandingPage() {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      
       // Show user-friendly error message
       alert(
         "There was an error submitting your information. You'll be redirected to the thank you page anyway."
       );
-      
       // Still redirect to thank you page for better UX
       router.push("/thank-you?type=roadmap");
     } finally {
@@ -176,19 +196,13 @@ export default function LandingPage() {
 
   const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Track download event with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "main_page_direct_download",
-      "mvp_roadmap"
-    );
-
-    // Trigger PDF download
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf"; // Replace with actual PDF path
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    link.click();
+    trackAndDownloadPDF({
+      filePath: "/mvp-roadmap.pdf",
+      fileName: "MVP-Roadmap-4Blocks.pdf",
+      leadSource: "main_page_direct_download",
+      downloadType: "mvp_roadmap",
+      autoClick: true,
+    });
   };
 
   return (

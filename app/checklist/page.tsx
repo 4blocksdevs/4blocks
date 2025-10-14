@@ -1,16 +1,23 @@
 "use client";
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, CheckCircle } from "lucide-react";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
-import { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
+import trackingConfig, { trackingEvents, leadSources } from "@/lib/enhanced-tracking-config";
+import { initializeHubSpot } from "@/lib/hubspot";
+import trackAndDownloadPDF from "@/lib/download-tracking";
+
 import { useRouter } from "next/navigation";
 
 export default function ChecklistPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   useEffect(() => {
     // Initialize UTM tracking for checklist page
@@ -35,25 +42,118 @@ export default function ChecklistPage() {
     }
   }, []);
 
+  const isUrl = (str: string) => {
+    try {
+      // Simple URL detection
+      const urlPattern = /https?:\/\//i;
+      return urlPattern.test(str);
+    } catch {
+      return false;
+    }
+  };
+
   const handleChecklistDownload = () => {
-    // Track checklist download with Universal Tracking
-    UniversalTracking.trackEvent({
-      event_type: "pdf_download",
-      file_name: "MVP-Checklist-4Blocks.pdf",
-      lead_source: leadSources.checklist_download,
-      download_type: "checklist",
-    });
+    // Require name and email before download
+    setNameError("");
+    if (!name || name.trim() === "") {
+      setNameError("Please enter your name.");
+      return;
+    }
+    if (isUrl(name)) {
+      setNameError("Name cannot contain a URL.");
+      return;
+    }
+    if (!email || email.trim() === "") {
+      alert("Please enter your email to download the checklist.");
+      return;
+    }
 
-    // Trigger actual download
-    const link = document.createElement("a");
-    link.href = "/mvp-checklist.pdf"; // You'll need to create this file
-    link.download = "MVP-Checklist-4Blocks.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Store email for attribution/tracking
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("lead_email", email.trim());
+    }
 
-    // Optionally, redirect to a thank you page
-    router.push("/thank-you?type=checklist");
+    // Get UTM params for GA
+    const utm = UTMTracker.getAttribution() || {};
+    const utmGA = UTMTracker.getAttributionForGA() || {};
+
+    setIsSubmitting(true);
+
+    (async () => {
+      try {
+        // Track & prepare download (will actually download later)
+        trackAndDownloadPDF({
+          filePath: "/mvp-checklist.pdf",
+          fileName: "MVP-Checklist-4Blocks.pdf",
+          leadSource: leadSources.checklist_download,
+          downloadType: "checklist",
+          autoClick: false,
+        });
+
+        // ...existing code...
+            if (typeof window !== "undefined") {
+              try {
+                (window as any).dataLayer = (window as any).dataLayer || [];
+                (window as any).dataLayer.push({
+                  event: "pdf_download",
+                  file_name: "MVP-Checklist-4Blocks.pdf",
+                  download_type: "checklist",
+                  lead_source: leadSources.checklist_download,
+                  // include attribution fields for GTM/meta
+                  ...(UTMTracker.getAttributionForMetaPixel() || {}),
+                });
+              } catch (err) {
+                console.warn("dataLayer push failed", err);
+              }
+            }
+
+
+        // Submit email to HubSpot using HUBSPOT_FORM_ID_2 for checklist
+        const portalId = process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || trackingConfig.hubspot.portalId;
+        const checklistFormId = process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID_2 || process.env.HUBSPOT_FORM_ID_2 || "";
+        const hubspot = initializeHubSpot(
+          portalId,
+          checklistFormId,
+          checklistFormId
+        );
+
+        const success = await hubspot.submitLead({
+          name: name.trim(),
+          email: email.trim(),
+          form_type: "Form 1",
+          lead_source: leadSources.checklist_download,
+        });
+
+        if (!success) {
+          console.warn("HubSpot submission failed for checklist download");
+        }
+
+        // Trigger actual download regardless of hubspot success (already tracked)
+        trackAndDownloadPDF({
+          filePath: "/mvp-checklist.pdf",
+          fileName: "MVP-Checklist-4Blocks.pdf",
+          leadSource: leadSources.checklist_download,
+          downloadType: "checklist",
+          autoClick: true,
+        });
+
+        // Redirect to thank you page
+        router.push("/thank-you?type=checklist");
+      } catch (err) {
+        console.error("Error during checklist download flow:", err);
+        // Still attempt download and redirect
+        trackAndDownloadPDF({
+          filePath: "/mvp-checklist.pdf",
+          fileName: "MVP-Checklist-4Blocks.pdf",
+          leadSource: leadSources.checklist_download + "_error",
+          downloadType: "checklist",
+          autoClick: true,
+        });
+        router.push("/thank-you?type=checklist");
+      } finally {
+        setIsSubmitting(false);
+      }
+    })();
   };
 
   const updateHubSpotProperty = async (property: string, value: string) => {
@@ -120,12 +220,36 @@ export default function ChecklistPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Your step-by-step validation guide
                 </p>
+                <div className="mb-4">
+                  <Input
+                    id="checklist-name"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="mb-2 focus:outline-none text-base border-[#9ED95D] border"
+                  />
+                  {nameError && (
+                    <div className="text-red-600 text-xs mb-2">{nameError}</div>
+                  )}
+                  <Input
+                    id="checklist-email"
+                    type="email"
+                    placeholder="Enter your email to download"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="mb-3 focus:outline-none text-base border-[#9ED95D] border"
+                  />
+                </div>
                 <Button
                   onClick={handleChecklistDownload}
+                  disabled={isSubmitting}
                   className="bg-[#9ED95D] hover:bg-[#8bc94a] text-black font-bold px-6 py-3 text-base"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  DOWNLOAD CHECKLIST
+                  {isSubmitting ? "SENDING..." : "DOWNLOAD CHECKLIST"}
                 </Button>
               </CardContent>
             </Card>

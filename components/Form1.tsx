@@ -8,6 +8,7 @@ import { initializeHubSpot, type LeadData } from "@/lib/hubspot";
 import UTMTracker from "@/lib/utm-tracker";
 import UniversalTracking from "@/lib/universal-tracking";
 import { trackingConfig, leadSources } from "@/lib/enhanced-tracking-config";
+import { subscribeToBrevo } from "@/lib/brevo-client";
 import { useRouter } from "next/navigation";
 
 interface Form1Props {
@@ -107,6 +108,8 @@ export default function Form1({
     try {
       // Get attribution data
       const attribution = UTMTracker.getAttributionForHubSpot();
+      const utm = UTMTracker.getAttribution() || {};
+      const utmGA = UTMTracker.getAttributionForGA() || {};
 
       // Prepare lead data with hidden fields
       const leadData: LeadData = {
@@ -127,6 +130,21 @@ export default function Form1({
         leadData
       );
 
+      // Google Analytics event with standard UTM fields
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "lead", {
+          event_category: "engagement",
+          event_label: "MVP Roadmap Download",
+          value: 1,
+          utm_source: utm.utm_source,
+          utm_medium: utm.utm_medium,
+          utm_campaign: utm.utm_campaign,
+          utm_content: utm.utm_content,
+          utm_term: utm.utm_term,
+          ...utmGA,
+        });
+      }
+
       // Submit to HubSpot
       const hubspot = initializeHubSpot(
         trackingConfig.hubspot.portalId,
@@ -134,7 +152,18 @@ export default function Form1({
         trackingConfig.hubspot.form2Id
       );
 
-      const success = await hubspot.submitLead(leadData);
+      const [hubspotOk, brevoOk] = await Promise.all([
+        hubspot.submitLead(leadData),
+        subscribeToBrevo({
+          email: formData.email,
+          firstName: formData.name,
+          company: formData.company || undefined,
+          lead_source: leadSources.hero_form,
+          tags: ["mvp_roadmap"],
+        }),
+      ]);
+
+      const success = hubspotOk; // maintain existing redirect logic tied to HubSpot
 
       if (success) {
         // Track successful conversion
@@ -156,7 +185,7 @@ export default function Form1({
       console.error("Form submission error:", error);
 
       // Even on error, redirect to thank you page for better UX
-      router.push("/thank-you");
+  router.push("/thank-you?type=roadmap");
     } finally {
       setIsSubmitting(false);
     }

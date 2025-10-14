@@ -1,0 +1,100 @@
+# .htaccess for 4Blocks
+# Place this file in the project root when deploying to an Apache HTTP server.
+# NOTE: Next.js deployments on Vercel, Netlify, or Node servers do not use .htaccess.
+
+############################
+# Basic security headers
+############################
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "no-referrer-when-downgrade"
+  Header always set X-XSS-Protection "1; mode=block"
+  # Strict Content Security Policy for production
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://js.hsforms.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com; font-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://api.hsforms.com; frame-src https://www.googletagmanager.com https://www.facebook.com https://calendly.com;"
+  # HTTP Strict Transport Security (HSTS)
+  Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+</IfModule>
+
+############################
+# Force HTTPS and remove www (production best practice)
+############################
+RewriteEngine On
+# Redirect www to non-www
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+# Force HTTPS (works behind proxies that set X-Forwarded-Proto)
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+############################
+# Prevent directory browsing
+############################
+Options -Indexes
+
+############################
+# Serve existing .html files for clean URLs (static export fallback)
+############################
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # If requested resource doesn't exist but a .html file exists, serve it
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^ %{REQUEST_URI}.html [L]
+</IfModule>
+
+############################
+# MIME types and CORS for fonts/svg
+############################
+AddType image/svg+xml svg svgz
+AddEncoding gzip svgz
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|svg)$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+</IfModule>
+
+############################
+# Compression (mod_deflate)
+############################
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+############################
+# Caching (mod_expires)
+############################
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/gif "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+  ExpiresByType application/font-ttf "access plus 1 year"
+</IfModule>
+
+############################
+# SPA fallback for static export (uncomment if using client-side routing only)
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^ /index.html [L]
+
+############################
+# Optional: Redirect rules for older URLs
+# Example: redirect /old-page to new page
+############################
+# Redirect 301 /old-page /new-page
+
+############################
+# End of file
+############################

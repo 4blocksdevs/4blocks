@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import Image from "next/image";
 import Script from "next/script";
 import { useSearchParams } from "next/navigation";
 import UniversalTracking from "@/lib/universal-tracking";
+import trackAndDownloadPDF from "@/lib/download-tracking";
 
 declare global {
   interface Window {
@@ -31,6 +33,16 @@ export default function ThankYouPage() {
 
   const [email, setEmail] = useState("");
   const [formData, setFormData] = useState(initialFormData);
+  const [calendlyUrl, setCalendlyUrl] = useState<string>(
+    "https://calendly.com/4blocksdevs/30min?primary_color=9ED95D"
+  );
+
+  const baseCalendly = useMemo(() => {
+    return (
+      process.env.NEXT_PUBLIC_CALENDLY_URL ||
+      "https://calendly.com/4blocksdevs/30min"
+    );
+  }, []);
 
   useEffect(() => {
     // Initialize Universal Tracking
@@ -43,6 +55,30 @@ export default function ThankYouPage() {
       page_title: "Thank You - MVP Roadmap",
     });
   }, []);
+
+  // Build Calendly URL with UTMs from current URL
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const loc = new URL(window.location.href);
+    const params = new URLSearchParams();
+    // preserve existing primary color
+    params.set("primary_color", "9ED95D");
+    // Copy UTM parameters if present
+    [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term",
+      "utm_id",
+    ].forEach((k) => {
+      const v = loc.searchParams.get(k);
+      if (v) params.set(k, v);
+    });
+
+    const query = params.toString();
+    setCalendlyUrl(`${baseCalendly}${query ? `?${query}` : ""}`);
+  }, [baseCalendly]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -73,22 +109,18 @@ export default function ThankYouPage() {
     };
   }, []);
 
-  const triggerPdfDownload = () => {
-    const link = document.createElement("a");
-    link.href = "/mvp-roadmap.pdf";
-    link.download = "MVP-Roadmap-4Blocks.pdf";
-    link.click();
+  const triggerPdfDownload = (source: string) => {
+    trackAndDownloadPDF({
+      filePath: "/mvp-roadmap.pdf",
+      fileName: "MVP-Roadmap-4Blocks.pdf",
+      leadSource: source,
+      downloadType: "mvp_roadmap",
+      autoClick: true,
+    });
   };
 
   const handleSecondaryDownload = async () => {
-    // Track secondary download with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "thank_you_page_secondary",
-      "mvp_roadmap"
-    );
-
-    // Send email with PDF
+    // Send email with PDF; tracking will fire only if fallback download occurs
     try {
       const response = await fetch("/api/send-pdf", {
         method: "POST",
@@ -99,14 +131,20 @@ export default function ThankYouPage() {
       });
 
       if (response.ok) {
+        // Optionally track secondary success event
+        UniversalTracking.trackPDFDownload(
+          "MVP-Roadmap-4Blocks.pdf",
+          "thank_you_page_secondary_email_sent",
+          "mvp_roadmap"
+        );
         alert("PDF sent successfully to your email!");
       } else {
         throw new Error("Failed to send PDF");
       }
     } catch (error) {
       console.error("Error sending PDF:", error);
-      // Fallback to direct download
-      triggerPdfDownload();
+      // Fallback to direct download with tracking
+      triggerPdfDownload("thank_you_page_secondary_fallback");
     }
   };
 
@@ -118,46 +156,34 @@ export default function ThankYouPage() {
       window.Calendly &&
       typeof window.Calendly.initPopupWidget === "function"
     ) {
-      window.Calendly.initPopupWidget({
-        url: "https://calendly.com/4blocksdevs/30min",
-      });
+      window.Calendly.initPopupWidget({ url: calendlyUrl });
     } else {
-      window.open(
-        "https://calendly.com/4blocksdevs/30min",
-        "_blank",
-        "noopener,noreferrer"
-      );
+      window.open(calendlyUrl, "_blank", "noopener,noreferrer");
     }
   };
 
   const handleDirectDownload = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Track download event with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "thank_you_page_direct",
-      "mvp_roadmap"
-    );
-
-    // Trigger PDF download
-    triggerPdfDownload();
+    triggerPdfDownload("thank_you_page_direct");
     setFormData(initialFormData);
   };
 
   const handleRoadmapDownload = () => {
-    // Track download with Universal Tracking
-    UniversalTracking.trackPDFDownload(
-      "MVP-Roadmap-4Blocks.pdf",
-      "thank_you_page_main_button",
-      "mvp_roadmap"
-    );
-
-    triggerPdfDownload();
+    triggerPdfDownload("thank_you_page_main_button");
   };
 
   return (
     <div className="min-h-screen bg-white">
+      {/** Track Calendly bookings via postMessage */}
+      {/* CalendlyThankYouTracker dynamic import as a component */}
+      {(() => {
+        const CalendlyThankYouTracker = dynamic(
+          () => import("@/components/CalendlyThankYouTracker"),
+          { ssr: false }
+        );
+        return <CalendlyThankYouTracker />;
+      })()}
       <link
         rel="stylesheet"
         href="https://assets.calendly.com/assets/external/widget.css"
@@ -202,9 +228,9 @@ export default function ThankYouPage() {
             id="roadmapDownloadButton"
             type="button"
             onClick={handleRoadmapDownload}
-            className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 text-base"
+            className="bg-[#9ED95D] hover:bg-[#9ED95D] text-black font-bold px-4 py-4 mb-8 uppercase text-base"
           >
-            DOWNLOAD MVP ROADMAP
+            DOWNLOAD {type === "checklist" ? " Founder's MVP Checklist" : "MVP ROADMAP"} PDF
           </Button>
         </div>
       </section>
@@ -420,7 +446,7 @@ export default function ThankYouPage() {
                   <div className="flex justify-center items-center w-full">
                     {/* Calendly Inline Widget - more sizeable and responsive */}
                     <iframe
-                      src="https://calendly.com/4blocksdevs/30min?primary_color=9ED95D"
+                      src={calendlyUrl}
                       width="90%"
                       height="500"
                       frameBorder="0"

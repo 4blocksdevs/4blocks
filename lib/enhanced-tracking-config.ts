@@ -3,18 +3,27 @@
 
 export const trackingConfig = {
   hubspot: {
-    portalId: process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID || "YOUR_PORTAL_ID",
-    form1Id: process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID || "FORM_1_ID",
-    form2Id: process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID || "FORM_2_ID", // Using same form ID for both forms
+    portalId:
+      process.env.NEXT_PUBLIC_HUBSPOT_PORTAL_ID ||
+      process.env.HUBSPOT_PORTAL_ID ||
+      "146982667",
+    form1Id:
+      process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID ||
+      process.env.HUBSPOT_FORM_ID ||
+      "3a3fb4e1-de3c-40ad-a09e-d0cd988cebc3",
+    form2Id:
+      process.env.NEXT_PUBLIC_HUBSPOT_FORM_ID_2 ||
+      process.env.HUBSPOT_FORM_ID_2 ||
+      "d2217c9d-3259-4524-a5a3-0ef6a7a3b2fe",
   },
   metaPixel: {
     pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID || "4277236155853060",
   },
   googleAnalytics: {
-    measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "GA_MEASUREMENT_ID",
+    measurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-CC9W51TKC8",
   },
   googleTagManager: {
-    gtmId: process.env.NEXT_PUBLIC_GTM_ID || "GTM-XXXXXX",
+    gtmId: process.env.NEXT_PUBLIC_GTM_ID || "GTM-5N39QMDC",
   },
   isDevelopment:
     typeof window !== "undefined" && window.location.hostname === "localhost",
@@ -78,6 +87,7 @@ export const trackingEvents = {
   thankYouDownload: {
     leadSource: leadSources.thankyou_download,
     metaPixel: {
+      // Using custom Meta event via fbq('trackCustom','DownloadPDF')
       event: "DownloadPDF",
       parameters: {
         lead_source: leadSources.thankyou_download,
@@ -123,6 +133,7 @@ export const trackingEvents = {
   checklistFromPDF: {
     leadSource: leadSources.checklist_download,
     metaPixel: {
+      // Custom checklist event; delivered via trackCustom('DownloadChecklist') if used directly
       event: "DownloadChecklist",
       parameters: {
         lead_source: leadSources.checklist_download,

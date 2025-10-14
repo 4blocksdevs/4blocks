@@ -1,217 +1,201 @@
-name: Deploy 4Blocks MVP to Ubuntu Server
+name: Deployment CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   pull_request:
-    branches: [main]
+    branches: ["main"]
 
 jobs:
-  test:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    name: Test and Build
-
+    strategy:
+      matrix:
+        node-version: [22.x]
+    env:
+      NPM_CONFIG_FUND: false # Disable npm fund messages
     steps:
+      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      # Set up Node.js environment
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "npm"
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
+      # Install dependencies and build
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --omit=dev # Use --omit=dev for production dependencies
 
-      - name: Run TypeScript check
-        run: npm run typecheck
-
-      - name: Run ESLint
-        run: npm run lint
-
-      - name: Build application
+      - name: Build Next.js app
         run: npm run build
-        env:
-          NODE_ENV: production
 
+      # Verify build
+      - name: Verify build
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Build failed: .next directory not found!"
+            exit 1
+          fi
+
+      # Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-files
           path: |
-            out/
+            .next/
             package.json
             package-lock.json
+            public/
+            next.config.js
           retention-days: 1
 
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    name: Deploy to Server
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-
-      - name: Deploy to Ubuntu Server
+      # Test SSH connection
+      - name: Test SSH Connection
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
-            # Create deployment directory if it doesn't exist
-            sudo mkdir -p /var/www/4BlocksMVP
-            sudo mkdir -p /var/www/4BlocksMVP/backups
+            echo "SSH connection successful"
 
-            # Create backup of current deployment
-            if [ -d "/var/www/4BlocksMVP/current" ]; then
-              sudo mv /var/www/4BlocksMVP/current /var/www/4BlocksMVP/backups/backup-$(date +%Y%m%d-%H%M%S)
+      # Prepare deployment directory with backup
+      - name: Prepare deployment directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          script: |
+            set -e
+            echo "Preparing deployment directory..."
+            # Create directories
+            sudo mkdir -p /var/www/4BlocksRoadmap
+            sudo mkdir -p /var/www/4BlocksRoadmap/backups
+            # Backup current deployment
+            if [ -d "/var/www/4BlocksRoadmap/current" ]; then
+              sudo mv /var/www/4BlocksRoadmap/current /var/www/4BlocksRoadmap/backups/backup-$(date +%Y%m%d-%H%M%S)
             fi
-
             # Clean up old backups (keep last 5)
-            sudo find /var/www/4BlocksMVP/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
-
+            sudo find /var/www/4BlocksRoadmap/backups -type d -name "backup-*" | sort -r | tail -n +6 | sudo xargs rm -rf
             # Create new deployment directory
-            sudo mkdir -p /var/www/4BlocksMVP/current
+            sudo mkdir -p /var/www/4BlocksRoadmap/current
+            # Set ownership
+            sudo chown -R $USER:$USER /var/www/4BlocksRoadmap
 
-            # Set proper ownership
-            sudo chown -R $USER:$USER /var/www/4BlocksMVP
-
-      - name: Copy files to server
+      # Transfer files to server
+      - name: Transfer files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "out/*"
-          target: "/var/www/4BlocksMVP/current/"
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          source: ./.next,./package.json,./package-lock.json,./public,./next.config.js
+          target: /var/www/4BlocksRoadmap/current
           strip_components: 1
+          overwrite: true
 
-      - name: Configure Nginx and PM2
+      # Deploy and start app
+      - name: Deploy and start app
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          envs: BREVO_API_KEY
           script: |
-            # Set proper permissions
-            sudo chown -R www-data:www-data /var/www/4BlocksMVP/current
-            sudo chmod -R 755 /var/www/4BlocksMVP/current
-
-            # Create nginx configuration if it doesn't exist
-            if [ ! -f "/etc/nginx/sites-available/4blocksmvp" ]; then
-              sudo tee /etc/nginx/sites-available/4blocksmvp > /dev/null <<EOF
-            server {
-                listen 80;
-                server_name your-domain.com www.your-domain.com;  # Replace with your domain
-                
-                root /var/www/4BlocksMVP/current;
-                index index.html;
-                
-                # Security headers
-                add_header X-Frame-Options "SAMEORIGIN" always;
-                add_header X-Content-Type-Options "nosniff" always;
-                add_header X-XSS-Protection "1; mode=block" always;
-                add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-                
-                # Gzip compression
-                gzip on;
-                gzip_vary on;
-                gzip_min_length 1000;
-                gzip_proxied any;
-                gzip_comp_level 6;
-                gzip_types
-                    text/plain
-                    text/css
-                    text/xml
-                    text/javascript
-                    application/javascript
-                    application/xml+rss
-                    application/json;
-                
-                # Handle Next.js static files
-                location /_next/static/ {
-                    alias /var/www/4BlocksMVP/current/_next/static/;
-                    expires 1y;
-                    add_header Cache-Control "public, immutable";
-                }
-                
-                # Handle API routes (if any)
-                location /api/ {
-                    try_files \$uri \$uri/ =404;
-                }
-                
-                # Handle all routes for SPA
-                location / {
-                    try_files \$uri \$uri/ \$uri.html /index.html;
-                }
-                
-                # Security: deny access to hidden files
-                location ~ /\. {
-                    deny all;
-                }
-            }
-            EOF
-              
-              # Enable the site
-              sudo ln -sf /etc/nginx/sites-available/4blocksmvp /etc/nginx/sites-enabled/
-              
-              # Remove default site if it exists
-              sudo rm -f /etc/nginx/sites-enabled/default
+            set -e
+            echo "Deploying application..."
+            # Ensure Node.js is installed (install 22.x if missing)
+            if ! command -v node &> /dev/null; then
+              echo "Node.js not found. Installing Node.js 22.x..."
+              curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+              sudo apt-get install -y nodejs
             fi
-
-            # Test nginx configuration
-            sudo nginx -t
-
-            # Reload nginx
-            sudo systemctl reload nginx
-
-            # Ensure nginx is running
-            sudo systemctl enable nginx
-            sudo systemctl start nginx
-
-      - name: Health Check
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          script: |
-            # Wait a moment for nginx to fully reload
-            sleep 5
-
-            # Check if the site is accessible
-            if curl -f -s http://localhost > /dev/null; then
-              echo "✅ Deployment successful! Site is accessible."
-              echo "📊 Deployment Statistics:"
-              echo "📁 Files deployed: $(find /var/www/4BlocksMVP/current -type f | wc -l)"
-              echo "💾 Total size: $(du -sh /var/www/4BlocksMVP/current | cut -f1)"
-              echo "🕒 Deployment time: $(date)"
-            else
-              echo "❌ Health check failed! Site may not be accessible."
+            node -v || true
+            npm -v || true
+            # Navigate to deployment directory
+            cd /var/www/4BlocksRoadmap/current
+            # Verify required build files exist
+            if [ ! -d ".next" ]; then echo ".next folder missing on server"; ls -la; exit 1; fi
+            if [ ! -f "package.json" ]; then echo "package.json missing on server"; exit 1; fi
+            if [ ! -d "public" ]; then echo "public folder missing on server"; exit 1; fi
+            # Write runtime environment file with secrets (from step env)
+            echo "Writing .env with BREVO_API_KEY..."
+            if [ -z "$BREVO_API_KEY" ]; then
+              echo "BREVO_API_KEY is empty or not set in secrets" >&2
               exit 1
             fi
+            printf "BREVO_API_KEY=%s\n" "$BREVO_API_KEY" | sudo tee /var/www/4BlocksRoadmap/current/.env > /dev/null
+            # Restrict permissions on the .env file
+            sudo chmod 600 /var/www/4BlocksRoadmap/current/.env
+            # Basic sanity check without leaking secret
+            echo ".env created:"; sudo ls -l /var/www/4BlocksRoadmap/current/.env
+            echo "Line count (should be 1):"; sudo sh -c 'wc -l /var/www/4BlocksRoadmap/current/.env'
+            # Install dependencies
+            npm ci --omit=dev
+            npm audit fix || true # Address vulnerabilities
+            # Install PM2 if not present
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
+            fi
+            export PATH=$HOME/.npm-global/bin:$PATH
+            # Set permissions
+            sudo chown -R www-data:www-data /var/www/4BlocksRoadmap/current
+            # Ensure the PM2 user can read .env (Next.js reads it on start)
+            sudo chown $USER:$USER /var/www/4BlocksRoadmap/current/.env
+            sudo chmod -R 755 /var/www/4BlocksRoadmap/current
+            # Stop and delete existing process
+            if pm2 list | grep -q 'roadmap'; then
+              pm2 stop roadmap || true
+              pm2 delete roadmap || true
+            fi
+            # Load .env into this shell so PM2 child inherits runtime env
+            set -a
+            . /var/www/4BlocksRoadmap/current/.env
+            set +a
+            # Verify runtime env is loaded (do not print the value)
+            if [ -z "$BREVO_API_KEY" ]; then
+              echo "Runtime env missing BREVO_API_KEY after sourcing .env" >&2
+              exit 1
+            fi
+            # Start app
+            pm2 start npm --name "roadmap" -- run start -- -p 3002
+            # Verify process
+            sleep 3
+            if ! pm2 list | grep -q 'roadmap.*online'; then
+              echo "Frontend process failed to start"
+              pm2 logs roadmap --lines 10
+              exit 1
+            fi
+            # Save PM2 configuration
+            pm2 save
+            pm2 startup systemd -u $USER --hp $HOME
+            # Health check
+            for i in {1..15}; do
+              if curl -f http://localhost:3002 >/dev/null 2>&1; then
+                echo "Application is responding on port 3002"
+                break
+              fi
+              if [ $i -eq 15 ]; then
+                echo "Health check failed after 15 attempts"
+                pm2 logs roadmap --lines 20
+                exit 1
+              fi
+              echo "Waiting for application... attempt $i/15"
+              sleep 2
+            done
+            echo "Deployment completed successfully"
 
-      - name: Notify deployment status
-        uses: appleboy/ssh-action@v1.0.3
-        if: always()
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          script: |
-            echo "🚀 4Blocks MVP Deployment Complete!"
-            echo "📍 Location: /var/www/4BlocksMVP/current"
-            echo "🌐 Server: $(hostname)"
-            echo "⏰ Time: $(date)"
-            echo "📋 Nginx Status: $(sudo systemctl is-active nginx)"
+      
