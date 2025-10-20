@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/checklist", "destination": "/checklist.html" },
+    { "source": "/checklist/:path*", "destination": "/checklist.html" }
+  ]
+}
